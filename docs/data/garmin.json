@@ -1,0 +1,47 @@
+{
+  "updated_at": "2026-06-29T06:00:00Z",
+  "_note": "Beispieldaten — wird täglich von fetch_data.py überschrieben",
+  "hrv": {
+    "lastNight": 52,
+    "status": "BALANCED",
+    "weeklyAvg": 48,
+    "balancedLow": 38,
+    "balancedHigh": 62
+  },
+  "bodyBattery": {
+    "current": 73,
+    "history": [
+      {"date": "2026-06-29", "charged": 82, "drained": 45, "endValue": 73},
+      {"date": "2026-06-28", "charged": 75, "drained": 55, "endValue": 62},
+      {"date": "2026-06-27", "charged": 88, "drained": 40, "endValue": 81},
+      {"date": "2026-06-26", "charged": 70, "drained": 60, "endValue": 58},
+      {"date": "2026-06-25", "charged": 85, "drained": 50, "endValue": 77},
+      {"date": "2026-06-24", "charged": 78, "drained": 48, "endValue": 68},
+      {"date": "2026-06-23", "charged": 90, "drained": 35, "endValue": 85}
+    ]
+  },
+  "restingHeartRate": 52,
+  "sleep": {
+    "score": 78,
+    "totalSeconds": 27000,
+    "deepSeconds": 5400,
+    "lightSeconds": 12600,
+    "remSeconds": 7200,
+    "awakeSeconds": 1800
+  },
+  "stress": {
+    "avgStressLevel": 24,
+    "maxStressLevel": 58
+  },
+  "vo2max": 52.0,
+  "lastActivity": {
+    "name": "Morgenlauf",
+    "type": "running",
+    "distanceMeters": 8543,
+    "durationSeconds": 2847,
+    "avgHr": 152,
+    "maxHr": 171,
+    "calories": 612,
+    "startTime": "2026-06-29T07:15:00"
+  }
+}

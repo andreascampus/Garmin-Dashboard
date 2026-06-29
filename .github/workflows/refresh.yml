@@ -1,0 +1,57 @@
+name: Garmin Daten aktualisieren
+
+on:
+  schedule:
+    # Täglich 06:00 UTC = 07:00 MEZ / 08:00 MESZ
+    - cron: '0 6 * * *'
+
+  # Manuell auslösbar: GitHub → Actions → "Run workflow"
+  workflow_dispatch:
+
+# GITHUB_TOKEN darf ins Repo schreiben — kein persönlicher Access Token nötig
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    name: Garmin Connect → garmin.json
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1 — Repo auschecken (mit Schreibrecht via GITHUB_TOKEN)
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # 2 — Python einrichten
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 3 — Abhängigkeiten installieren
+      - name: Abhängigkeiten installieren
+        run: pip install "garminconnect>=0.2.13"
+
+      # 4 — Garmin-Daten abrufen
+      #      Credentials kommen aus GitHub Secrets (niemals im Code!)
+      #      Secrets anlegen: Settings → Secrets → Actions → New repository secret
+      #        GARMIN_EMAIL    = andreas.possert@hotmail.com
+      #        GARMIN_PASSWORD = <dein Passwort>
+      - name: Garmin-Daten abrufen
+        env:
+          GARMIN_EMAIL:    ${{ secrets.GARMIN_EMAIL }}
+          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+        run: python fetch_data.py
+
+      # 5 — Aktualisierte garmin.json committen & pushen
+      #     Nur wenn sich etwas geändert hat (git diff --staged --quiet)
+      - name: Daten committen
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/data/garmin.json
+          git diff --staged --quiet || \
+            git commit -m "chore: Garmin-Daten $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push

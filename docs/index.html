@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Garmin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+
+    <header class="header">
+      <div class="header-left">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="title">GARMIN DASHBOARD</span>
+      </div>
+      <div class="header-right">
+        <span class="updated-label">Aktualisiert</span>
+        <span class="updated-time" id="updated-time">—</span>
+      </div>
+    </header>
+
+    <main class="grid" id="grid">
+
+      <!-- ── Recovery ─────────────────────────────────── -->
+      <section class="card card-recovery" style="--delay:0.05s">
+        <div class="card-label">RECOVERY</div>
+
+        <div class="ring-wrapper">
+          <svg class="ring-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <!-- Track -->
+            <circle class="ring-track" cx="100" cy="100" r="80"/>
+            <!-- Fill – animiert via JS -->
+            <circle class="ring-fill" id="ring-fill" cx="100" cy="100" r="80"/>
+          </svg>
+          <div class="ring-center">
+            <div class="ring-pct" id="ring-pct">—</div>
+            <div class="ring-label-inner">RECOVERY</div>
+            <div class="ring-status" id="ring-status">—</div>
+          </div>
+        </div>
+
+        <div class="hrv-row">
+          <div class="hrv-metric">
+            <div class="hrv-value" id="hrv-value">—</div>
+            <div class="hrv-sub">ms HRV</div>
+          </div>
+          <div class="hrv-divider"></div>
+          <div class="hrv-metric">
+            <div class="hrv-value" id="hrv-avg">—</div>
+            <div class="hrv-sub">Wöch. ø</div>
+          </div>
+        </div>
+
+        <div class="rhr-bar">
+          <span class="rhr-label">RHR</span>
+          <span class="rhr-value" id="rhr-value">— bpm</span>
+        </div>
+      </section>
+
+      <!-- ── Body Battery ──────────────────────────────── -->
+      <section class="card card-battery" style="--delay:0.10s">
+        <div class="card-label">BODY BATTERY</div>
+        <div class="bb-top">
+          <span class="bb-value" id="bb-value">—</span>
+          <span class="bb-unit">%</span>
+          <span class="bb-trend" id="bb-trend"></span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="bb-chart"></canvas>
+        </div>
+      </section>
+
+      <!-- ── Schlaf ────────────────────────────────────── -->
+      <section class="card card-sleep" style="--delay:0.15s">
+        <div class="card-label">SCHLAF</div>
+        <div class="sleep-top">
+          <span class="sleep-score" id="sleep-score">—</span>
+          <span class="sleep-dur" id="sleep-dur">—</span>
+        </div>
+        <div class="phase-bar" id="phase-bar">
+          <div class="phase deep"  id="ph-deep"></div>
+          <div class="phase rem"   id="ph-rem"></div>
+          <div class="phase light" id="ph-light"></div>
+          <div class="phase awake" id="ph-awake"></div>
+        </div>
+        <div class="phase-legend">
+          <div class="leg"><span class="dot deep"></span>Tief <b id="dur-deep">—</b></div>
+          <div class="leg"><span class="dot rem"></span>REM <b id="dur-rem">—</b></div>
+          <div class="leg"><span class="dot light"></span>Leicht <b id="dur-light">—</b></div>
+          <div class="leg"><span class="dot awake"></span>Wach <b id="dur-awake">—</b></div>
+        </div>
+      </section>
+
+      <!-- ── Letzte Aktivität ──────────────────────────── -->
+      <section class="card card-activity" style="--delay:0.20s">
+        <div class="card-label">LETZTE AKTIVITÄT</div>
+        <div class="act-name" id="act-name">—</div>
+        <div class="act-grid">
+          <div class="act-stat">
+            <div class="act-stat-label">DISTANZ</div>
+            <div class="act-stat-val" id="act-dist">—</div>
+          </div>
+          <div class="act-stat">
+            <div class="act-stat-label">DAUER</div>
+            <div class="act-stat-val" id="act-dur">—</div>
+          </div>
+          <div class="act-stat">
+            <div class="act-stat-label">Ø PULS</div>
+            <div class="act-stat-val" id="act-hr">—</div>
+          </div>
+          <div class="act-stat">
+            <div class="act-stat-label">KALORIEN</div>
+            <div class="act-stat-val" id="act-cal">—</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Stress ────────────────────────────────────── -->
+      <section class="card card-stress" style="--delay:0.25s">
+        <div class="card-label">STRESS</div>
+        <div class="metric-big" id="stress-val">—</div>
+        <div class="metric-sub" id="stress-label">—</div>
+        <div class="stress-track">
+          <div class="stress-fill" id="stress-fill"></div>
+          <div class="stress-thumb" id="stress-thumb"></div>
+        </div>
+        <div class="stress-scale">
+          <span>RUHIG</span><span>HOCH</span>
+        </div>
+      </section>
+
+      <!-- ── VO2max ────────────────────────────────────── -->
+      <section class="card card-vo2" style="--delay:0.30s">
+        <div class="card-label">VO2MAX</div>
+        <div class="metric-big" id="vo2-val">—</div>
+        <div class="metric-sub" id="vo2-label">—</div>
+        <div class="vo2-bar-wrap">
+          <div class="vo2-bar-bg">
+            <div class="vo2-bar-fill" id="vo2-fill"></div>
+          </div>
+          <div class="vo2-scale">
+            <span>20</span><span>35</span><span>50</span><span>65+</span>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
