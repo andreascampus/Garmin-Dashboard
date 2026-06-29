@@ -212,62 +212,102 @@ function renderRecovery(range) {
     }, 100);
 
   } else {
-    // Trend-Chart HRV + RHR
-    const slice  = getSlice(range);
-    const labels = dayLabels(slice);
-    const hrvVals = [...slice].reverse().map(d => d.hrv ?? null);
-    const rhrVals = [...slice].reverse().map(d => d.rhr ?? null);
+    const slice   = getSlice(range);
+    const n       = slice.length;
+    const reversed = [...slice].reverse();
+
+    // Dünnere Labels bei 30T: nur jeden 4. Tag beschriften
+    const labelStep = n > 14 ? 4 : 2;
+    const labels  = reversed.map((d, i) => {
+      if (i % labelStep !== 0) return '';
+      const dt = new Date(d.date + 'T12:00:00');
+      return dt.toLocaleDateString('de-DE', { day: 'numeric', month: 'numeric' });
+    });
+
+    const rhrVals = reversed.map(d => d.rhr ?? null);
+    const hrvVals = reversed.map(d => d.hrv ?? null);
+    const hasHRV  = hrvVals.some(v => v != null);
 
     el.innerHTML = `
-      <div class="trend-chart-label">HRV (ms) & Ruhepuls (bpm)</div>
-      <div class="chart-wrap"><canvas id="recovery-chart"></canvas></div>`;
+      <div class="trend-chart-label">${hasHRV ? 'HRV (ms) & Ruhepuls (bpm)' : 'Ruhepuls (bpm)'}</div>
+      <div class="chart-wrap" style="height:200px;flex:none"><canvas id="recovery-chart"></canvas></div>`;
+
+    const datasets = [];
+    if (hasHRV) {
+      datasets.push({
+        label: 'HRV ms',
+        data: hrvVals,
+        borderColor: '#1ed760',
+        backgroundColor: 'rgba(30,215,96,0.08)',
+        borderWidth: 2,
+        pointRadius: n > 14 ? 2 : 3,
+        pointBackgroundColor: '#1ed760',
+        tension: 0.35,
+        fill: true,
+        spanGaps: true,
+        yAxisID: 'yHrv',
+      });
+    }
+    datasets.push({
+      label: 'RHR bpm',
+      data: rhrVals,
+      borderColor: '#f3727f',
+      backgroundColor: hasHRV ? 'transparent' : ctx => {
+        const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 160);
+        g.addColorStop(0, 'rgba(243,114,127,0.18)');
+        g.addColorStop(1, 'rgba(243,114,127,0.00)');
+        return g;
+      },
+      borderWidth: 2,
+      pointRadius: n > 14 ? 2 : 3,
+      pointBackgroundColor: '#f3727f',
+      tension: 0.35,
+      fill: !hasHRV,
+      spanGaps: true,
+      yAxisID: hasHRV ? 'yRhr' : 'y',
+    });
+
+    // RHR-Bereich dynamisch berechnen
+    const rhrFiltered = rhrVals.filter(v => v != null);
+    const rhrMin = rhrFiltered.length ? Math.floor(Math.min(...rhrFiltered) / 5) * 5 - 5 : 30;
+    const rhrMax = rhrFiltered.length ? Math.ceil(Math.max(...rhrFiltered) / 5) * 5 + 5 : 80;
+
+    const scales = {
+      x: {
+        grid: { display: false },
+        ticks: {
+          color: '#55585f',
+          font: { size: 9, family: 'Inter' },
+          maxRotation: 0,
+          autoSkip: false,
+        },
+      },
+    };
+    if (hasHRV) {
+      scales.yHrv = { position: 'left',  grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#1ed760', font: { size: 9 }, stepSize: 10 } };
+      scales.yRhr = { position: 'right', grid: { display: false },                   ticks: { color: '#f3727f', font: { size: 9 }, stepSize: 5 }, min: rhrMin, max: rhrMax };
+    } else {
+      scales.y = {
+        min: rhrMin, max: rhrMax,
+        grid: { color: 'rgba(255,255,255,0.05)' },
+        ticks: { color: '#f3727f', font: { size: 9 }, stepSize: 5, callback: v => `${v}` },
+      };
+    }
 
     charts['recovery'] = new Chart($('recovery-chart').getContext('2d'), {
       type: 'line',
-      data: {
-        labels,
-        datasets: [
-          {
-            label: 'HRV ms',
-            data: hrvVals,
-            borderColor: '#1ed760',
-            backgroundColor: 'rgba(30,215,96,0.08)',
-            borderWidth: 2,
-            pointRadius: 3,
-            pointBackgroundColor: '#1ed760',
-            tension: 0.35,
-            fill: true,
-            spanGaps: true,
-            yAxisID: 'yHrv',
-          },
-          {
-            label: 'RHR bpm',
-            data: rhrVals,
-            borderColor: '#f3727f',
-            backgroundColor: 'transparent',
-            borderWidth: 2,
-            pointRadius: 3,
-            pointBackgroundColor: '#f3727f',
-            tension: 0.35,
-            spanGaps: true,
-            yAxisID: 'yRhr',
-          },
-        ],
-      },
+      data: { labels, datasets },
       options: {
         ...CHART_DEFAULTS,
         plugins: {
           ...CHART_DEFAULTS.plugins,
           legend: {
-            display: true, position: 'top', align: 'end',
+            display: hasHRV,
+            position: 'top', align: 'end',
             labels: { color: '#55585f', font: { size: 9, family: 'Inter' }, boxWidth: 8, boxHeight: 8, padding: 8 },
           },
         },
-        scales: {
-          x: xScaleOpts(),
-          yHrv: { ...yScaleOpts(0, null, 20), position: 'left',  ticks: { color: '#1ed760', font: { size: 9 } } },
-          yRhr: { ...yScaleOpts(30, 80, 10), position: 'right', ticks: { color: '#f3727f', font: { size: 9 } }, grid: { display: false } },
-        },
+        scales,
       },
     });
   }
