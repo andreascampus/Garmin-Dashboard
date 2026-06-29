@@ -109,10 +109,17 @@
   $('ring-status').textContent  = statusText;
   $('ring-status').style.color  = statusColor;
 
-  const CIRC = 502.65; // 2π × 80
+  const CIRC = 515.22; // 2π × 82
   const ringEl = $('ring-fill');
   ringEl.style.stroke = ringColor;
-  ringEl.style.filter = `drop-shadow(0 0 12px ${ringGlow})`;
+  ringEl.style.filter = `drop-shadow(0 0 16px ${ringGlow})`;
+
+  // WHOOP-style filled status badge class
+  const statusEl = $('ring-status');
+  statusEl.className = 'ring-status';
+  if (recoveryPct >= 67)      statusEl.classList.add('status-optimal');
+  else if (recoveryPct >= 34) statusEl.classList.add('status-moderate');
+  else if (recoveryPct > 0)   statusEl.classList.add('status-low');
 
   setTimeout(() => {
     ringEl.style.strokeDashoffset = CIRC * (1 - recoveryPct / 100);
@@ -124,61 +131,80 @@
 
   // ── Body Battery ──────────────────────────────────────────────────────
   const bb = data.bodyBattery || {};
-  const bbCurrent = bb.current;
+  const hist = (bb.history || []);
+
+  // Use today's "charged" value as display when endValue is null
+  const todayCharged = hist[0]?.charged ?? null;
+  const bbDisplay    = bb.current ?? todayCharged;
   const bbEl = $('bb-value');
 
-  bbEl.textContent = bbCurrent ?? '—';
-  if (bbCurrent != null) {
-    if (bbCurrent >= 70)      { bbEl.style.color = '#1ed760'; }
-    else if (bbCurrent >= 40) { bbEl.style.color = '#ffa42b'; }
-    else                      { bbEl.style.color = '#f3727f'; }
+  bbEl.textContent = bbDisplay ?? '—';
+  if (bbDisplay != null) {
+    if (bbDisplay >= 70)      bbEl.style.color = '#1ed760';
+    else if (bbDisplay >= 40) bbEl.style.color = '#ffa42b';
+    else                      bbEl.style.color = '#f3727f';
   }
 
-  // Trend (Vergleich heute ↔ gestern)
-  const hist = (bb.history || []);
-  if (hist.length >= 2) {
-    const diff = (hist[0].endValue ?? 0) - (hist[1].endValue ?? 0);
-    $('bb-trend').textContent = diff > 0 ? `▲ ${diff}` : diff < 0 ? `▼ ${Math.abs(diff)}` : '—';
-    $('bb-trend').style.color = diff > 0 ? 'var(--green)' : diff < 0 ? 'var(--red)' : 'var(--text-muted)';
+  // Add "GELADEN HEUTE" sub-label below the number
+  const bbLabelEl = document.createElement('div');
+  bbLabelEl.className = 'bb-label';
+  bbLabelEl.textContent = bb.current != null ? 'AKTUELL' : 'GELADEN HEUTE';
+  bbEl.closest('.bb-top').insertAdjacentElement('afterend', bbLabelEl);
+
+  // Trend: charged minus drained for today
+  if (hist.length > 0) {
+    const net = (hist[0].charged ?? 0) - (hist[0].drained ?? 0);
+    $('bb-trend').textContent = net > 0 ? `+${net}` : `${net}`;
+    $('bb-trend').style.color = net > 0 ? 'var(--green)' : net < 0 ? 'var(--red)' : 'var(--text-muted)';
   }
 
-  // Body Battery Chart (7 Tage, ältester zuerst)
+  // Body Battery Chart — grouped bars: charged (green) vs drained (red)
   const bbRev    = [...hist].reverse();
   const bbLabels = bbRev.map(d => {
     const dt = new Date(d.date + 'T12:00:00');
     return dt.toLocaleDateString('de-DE', { weekday: 'short' });
   });
-  const bbVals = bbRev.map(d => d.endValue ?? null);
 
   new Chart($('bb-chart').getContext('2d'), {
-    type: 'line',
+    type: 'bar',
     data: {
       labels: bbLabels,
-      datasets: [{
-        data: bbVals,
-        borderColor: '#1ed760',
-        backgroundColor: ctx => {
-          const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 120);
-          g.addColorStop(0, 'rgba(30,215,96,0.18)');
-          g.addColorStop(1, 'rgba(30,215,96,0.00)');
-          return g;
+      datasets: [
+        {
+          label: 'Geladen',
+          data: bbRev.map(d => d.charged ?? 0),
+          backgroundColor: 'rgba(30,215,96,0.65)',
+          hoverBackgroundColor: 'rgba(30,215,96,0.90)',
+          borderRadius: 4,
+          borderSkipped: false,
         },
-        borderWidth: 2,
-        pointRadius: 4,
-        pointBackgroundColor: '#1ed760',
-        pointBorderColor: '#111',
-        pointBorderWidth: 2,
-        fill: true,
-        tension: 0.35,
-        spanGaps: true,
-      }],
+        {
+          label: 'Verbraucht',
+          data: bbRev.map(d => d.drained ?? 0),
+          backgroundColor: 'rgba(243,114,127,0.50)',
+          hoverBackgroundColor: 'rgba(243,114,127,0.80)',
+          borderRadius: 4,
+          borderSkipped: false,
+        },
+      ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       animation: { duration: 900, easing: 'easeOutQuart' },
       plugins: {
-        legend: { display: false },
+        legend: {
+          display: true,
+          position: 'top',
+          align: 'end',
+          labels: {
+            color: '#55585f',
+            font: { size: 9, family: 'Inter' },
+            boxWidth: 8,
+            boxHeight: 8,
+            padding: 8,
+          },
+        },
         tooltip: {
           backgroundColor: '#1a1a1a',
           borderColor: '#2a2a2a',
@@ -186,12 +212,11 @@
           titleColor: '#8a8a8a',
           bodyColor: '#f0f0f0',
           padding: 10,
-          callbacks: { label: ctx => ` ${ctx.parsed.y}%` },
         },
       },
       scales: {
         x: {
-          grid: { color: 'rgba(255,255,255,0.04)' },
+          grid: { display: false },
           ticks: { color: '#5a5a5a', font: { size: 10, family: 'Inter' } },
         },
         y: {
@@ -200,7 +225,6 @@
           ticks: {
             color: '#5a5a5a',
             font: { size: 10, family: 'Inter' },
-            callback: v => `${v}%`,
             stepSize: 25,
           },
         },
