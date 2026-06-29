@@ -154,8 +154,8 @@ body::after {
   flex-direction: column;
   box-shadow: var(--shadow-sm);
   opacity: 0;
-  transform: translateY(14px);
-  animation: fadeUp 0.55s cubic-bezier(0.4,0,0.2,1) forwards;
+  transform: translateY(18px) scale(0.97);
+  animation: cardReveal 0.70s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   animation-delay: var(--delay, 0s);
   transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
 }
@@ -205,7 +205,11 @@ body::after {
   border-radius: var(--radius-pill);
   padding: 3px 9px;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transform: scale(1);
+  transition:
+    background 0.40s cubic-bezier(0.34, 1.56, 0.64, 1),
+    color      0.20s ease,
+    transform  0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   white-space: nowrap;
 }
 
@@ -214,9 +218,14 @@ body::after {
   background: rgba(255,255,255,0.06);
 }
 
+.pill:active {
+  transform: scale(0.88);
+}
+
 .pill.active {
-  background: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.14);
   color: var(--text);
+  transform: scale(1);
 }
 
 /* ── Card Body ──────────────────────────────────────────────────────── */
@@ -315,6 +324,7 @@ body::after {
     stroke-dashoffset 1.6s cubic-bezier(0.4, 0, 0.2, 1),
     stroke 0.4s ease,
     filter 0.4s ease;
+  animation: ringGlow 2.8s ease-in-out 1.8s infinite;
 }
 
 @keyframes ringGlow {
@@ -879,8 +889,20 @@ body::after {
 }
 
 /* ── Animations ────────────────────────────────────────────────────── */
+@keyframes cardReveal {
+  0%   { opacity: 0;  transform: translateY(18px) scale(0.97); }
+  45%  { opacity: 1; }
+  100% { opacity: 1;  transform: translateY(0)    scale(1);    }
+}
+
 @keyframes fadeUp {
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Odometer: Zahl wechselt mit kurzer Vertikal-Bewegung */
+@keyframes odoIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -948,6 +970,7 @@ body::after {
     padding: 18px 16px;
     border-radius: 14px;
     animation-delay: 0s !important; /* Alle gleichzeitig einblenden */
+    animation-name: cardReveal !important;
   }
 
   .card-top { margin-bottom: 14px; }

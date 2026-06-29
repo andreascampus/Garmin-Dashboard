@@ -44,6 +44,25 @@ function fmtDate(dateStr) {
 
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
+// ── Odometer Count-Up ────────────────────────────────────────────────────────
+// el: DOM element whose textContent to animate
+// target: numeric target value
+// duration: ms (default 950)
+// fmt: optional formatter function v => string; defaults to Math.round(v).toString()
+function countUp(el, target, duration = 950, fmt = null) {
+  if (!el || target == null || isNaN(target)) return;
+  const format = fmt || (v => String(Math.round(v)));
+  const ease = t => 1 - Math.pow(1 - t, 4); // easeOutQuart
+  const t0 = performance.now();
+  const tick = now => {
+    const p = Math.min((now - t0) / duration, 1);
+    el.textContent = format(target * ease(p));
+    if (p < 1) requestAnimationFrame(tick);
+    else el.textContent = format(target);
+  };
+  requestAnimationFrame(tick);
+}
+
 function actTypeIcon(type) {
   const map = {
     running: '🏃', cycling: '🚴', swimming: '🏊', walking: '🚶',
@@ -205,11 +224,15 @@ function renderRecovery(range) {
         <span class="rhr-value">${rhr ? rhr + ' bpm' : '— bpm'}</span>
       </div>`;
 
-    // Animiere Ring nach Render
+    // Animiere Ring + Zahl nach Render
     setTimeout(() => {
       const ring = document.getElementById('r-ring');
       if (ring) ring.style.strokeDashoffset = offset;
-    }, 100);
+      if (pct > 0) {
+        const pctEl = el.querySelector('.ring-pct');
+        if (pctEl) countUp(pctEl, pct, 1300, v => Math.round(v) + '%');
+      }
+    }, 120);
 
   } else {
     // ── WHOOP-Style: Belastung & Erholung ─────────────────────────────
@@ -427,6 +450,10 @@ function renderBattery(range) {
       </div>
       <div class="chart-wrap"><canvas id="battery-chart"></canvas></div>`;
 
+    // Animate main number
+    const bbNumEl = el.querySelector('.bb-value');
+    if (bbNumEl && display != null) countUp(bbNumEl, display, 900);
+
     const slice  = bbHist.slice(0, 7);
     const labels = [...slice].reverse().map(d => new Date(d.date + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'short' }));
 
@@ -517,6 +544,10 @@ function renderSleep(range) {
         <div class="leg"><span class="dot light"></span>Leicht <b>${fmtHM(sleep.lightSeconds)}</b></div>
         <div class="leg"><span class="dot awake"></span>Wach <b>${fmtHM(sleep.awakeSeconds)}</b></div>
       </div>`;
+
+    // Animate sleep score
+    const sleepScoreEl = el.querySelector('.sleep-score');
+    if (sleepScoreEl && sleep.score != null) countUp(sleepScoreEl, sleep.score, 900);
 
     if (total > 0) {
       setTimeout(() => {
@@ -618,6 +649,12 @@ function renderSteps(range) {
         <div class="steps-fill" id="steps-fill" style="background:${color}"></div>
       </div>`;
 
+    // Animate step count
+    const stepsNumEl = el.querySelector('.steps-value');
+    if (stepsNumEl && stepsToday != null) {
+      countUp(stepsNumEl, stepsToday, 1100, v => Math.round(v).toLocaleString('de-DE'));
+    }
+
     setTimeout(() => {
       const fill = document.getElementById('steps-fill');
       if (fill) fill.style.width = `${pct}%`;
@@ -701,6 +738,10 @@ function renderStress(range) {
         <div class="stress-thumb" id="s-thumb"></div>
       </div>
       <div class="stress-scale"><span>RUHIG</span><span>HOCH</span></div>`;
+
+    // Animate stress number
+    const stressNumEl = el.querySelector('.metric-big');
+    if (stressNumEl && avg != null) countUp(stressNumEl, avg, 900);
 
     setTimeout(() => {
       const t = document.getElementById('s-thumb');
