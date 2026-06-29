@@ -133,14 +133,15 @@ body::after {
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Grid ──────────────────────────────────────────────────────────── */
+/* ── Grid (Basis, wird unten überschrieben) ────────────────────────── */
+
+/* ── Grid angepasst für 6 Karten ──────────────────────────────────── */
 .grid {
   display: grid;
   grid-template-columns: 290px 1fr 1fr;
-  grid-template-rows: auto auto;
+  grid-template-rows: auto auto auto;
   gap: 10px;
 }
-
 .card-recovery { grid-row: 1 / 3; }
 
 /* ── Cards ─────────────────────────────────────────────────────────── */
@@ -166,13 +167,74 @@ body::after {
   transform: translateY(-3px);
 }
 
+/* ── Card Top (Label + Pills nebeneinander) ─────────────────────────── */
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  flex-shrink: 0;
+}
+
 .card-label {
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 2.5px;
   color: var(--text-muted);
   text-transform: uppercase;
-  margin-bottom: 20px;
+}
+
+/* ── Time Pills ─────────────────────────────────────────────────────── */
+.time-pills {
+  display: flex;
+  gap: 3px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 3px;
+}
+
+.pill {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 3px 9px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.pill:hover {
+  color: var(--text-sec);
+  background: rgba(255,255,255,0.06);
+}
+
+.pill.active {
+  background: rgba(255,255,255,0.12);
+  color: var(--text);
+}
+
+/* ── Card Body ──────────────────────────────────────────────────────── */
+.card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Trend label inside card body */
+.trend-chart-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 10px;
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -565,6 +627,220 @@ body::after {
   font-weight: 600;
 }
 
+/* ── Training Readiness Row ────────────────────────────────────────── */
+.readiness-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 8px 0;
+  margin-bottom: 10px;
+}
+
+.readiness-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.readiness-val {
+  font-size: 22px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5px;
+}
+
+/* ── Body Battery Today Stats ───────────────────────────────────────── */
+.bb-today-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.bb-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bb-stat-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bb-stat-val {
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.3px;
+}
+
+.bb-stat-lbl {
+  font-size: 9px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Steps Card ─────────────────────────────────────────────────────── */
+.steps-top {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.steps-value {
+  font-size: 46px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.steps-unit {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.steps-goal-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.steps-goal-lbl {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.steps-goal-pct {
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.steps-track {
+  height: 5px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.steps-fill {
+  height: 100%;
+  border-radius: 3px;
+  width: 0;
+  transition: width 1.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── Activity List ──────────────────────────────────────────────────── */
+.act-empty {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 24px 0;
+}
+
+.act-summary {
+  display: flex;
+  gap: 0;
+  margin-bottom: 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.act-sum-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 8px;
+  gap: 3px;
+  border-right: 1px solid var(--border-subtle);
+}
+.act-sum-stat:last-child { border-right: none; }
+
+.act-sum-val {
+  font-size: 16px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5px;
+}
+
+.act-sum-lbl {
+  font-size: 8.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.act-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  max-height: 260px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.08) transparent;
+}
+
+.act-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-xs);
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.act-item:hover {
+  background: var(--surface-hover);
+  border-color: var(--border);
+}
+
+.act-item-icon { font-size: 16px; flex-shrink: 0; }
+
+.act-item-info { flex: 1; min-width: 0; }
+
+.act-item-name {
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.act-item-meta {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.act-item-hr {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--red);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
 /* ── Animations ────────────────────────────────────────────────────── */
 @keyframes fadeUp {
   to { opacity: 1; transform: translateY(0); }
@@ -574,30 +850,18 @@ body::after {
 @media (max-width: 980px) {
   .grid {
     grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
   }
   .card-recovery {
     grid-row: auto;
     grid-column: 1 / -1;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 20px;
   }
-  .card-recovery .card-label { width: 100%; }
-  .ring-wrapper { margin: 0; }
-  .hrv-row { width: auto; min-width: 180px; }
-  .rhr-bar { width: auto; min-width: 180px; }
 }
 
 @media (max-width: 600px) {
   .app { padding: 18px 14px 40px; }
   .grid { grid-template-columns: 1fr; gap: 8px; }
-  .card-recovery {
-    grid-column: auto;
-    flex-direction: column;
-    align-items: center;
-  }
   .metric-big { font-size: 48px; }
-  .bb-value, .sleep-score { font-size: 44px; letter-spacing: -2px; }
+  .steps-value { font-size: 38px; }
+  .pill { font-size: 8px; padding: 3px 7px; }
 }

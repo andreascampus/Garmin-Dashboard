@@ -1,20 +1,18 @@
 """
-fetch_data.py — Garmin Connect Datenabruf
-=========================================
+fetch_data.py — Garmin Connect Datenabruf (30-Tage-History)
+=============================================================
 Ruft alle relevanten Gesundheitsdaten von Garmin Connect ab
 und speichert sie als docs/data/garmin.json.
 
 ── Erster lokaler Lauf (einmalig) ──────────────────────────────
     pip install "garminconnect>=0.2.13"
-    python fetch_data.py
+    python3 fetch_data.py
     → MFA-Code eingeben wenn Garmin ihn verlangt
     → Am Ende wird GARMIN_TOKENS ausgegeben → als GitHub Secret speichern
 
 ── GitHub Actions (danach automatisch) ─────────────────────────
     Secrets nötig:
         GARMIN_TOKENS   ← Token-String vom ersten lokalen Lauf
-    Optional (nicht mehr zwingend nötig):
-        GARMIN_EMAIL / GARMIN_PASSWORD
 """
 
 import json
@@ -34,14 +32,14 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 # ── Pfade ───────────────────────────────────────────────────────────────────
-ROOT = Path(__file__).parent
+ROOT     = Path(__file__).parent
 OUT_PATH = ROOT / "docs" / "data" / "garmin.json"
-SESSION_DIR = ROOT / "garmin_session"   # Session-Token-Cache (lokal)
+TOKEN_DIR = Path.home() / ".garminconnect"
 
 
 # ── Hilfsfunktionen ─────────────────────────────────────────────────────────
 def get_credentials():
-    email = os.environ.get("GARMIN_EMAIL", "").strip()
+    email    = os.environ.get("GARMIN_EMAIL", "").strip()
     password = os.environ.get("GARMIN_PASSWORD", "").strip()
     if not email:
         print("\nGARMIN_EMAIL nicht gefunden.")
@@ -52,155 +50,82 @@ def get_credentials():
 
 
 def get_mfa():
-    """Callback für MFA/2FA – wird nur bei interaktivem Login aufgerufen."""
     return input("Garmin MFA-Code (aus E-Mail/Authenticator): ").strip()
 
 
-def safe_call(fn, label="", default=None, retries=2):
-    """Führt fn() aus, wiederholt bei Fehler und gibt default zurück."""
-    for attempt in range(retries + 1):
-        try:
-            result = fn()
-            return result
-        except Exception as exc:
-            if attempt < retries:
-                log.warning(f"{label} — Versuch {attempt + 1} fehlgeschlagen: {exc!r}. Retry in 3s...")
-                time.sleep(3)
-            else:
-                log.error(f"{label} — endgültig fehlgeschlagen: {exc!r}")
-                return default
-
-
-def fmt_duration(seconds):
-    if seconds is None:
-        return None
-    h = int(seconds // 3600)
-    m = int((seconds % 3600) // 60)
-    return f"{h}h {m:02d}m" if h else f"{m}m"
+def safe(fn, label="", default=None):
+    """Führt fn() aus und gibt default zurück bei jedem Fehler."""
+    try:
+        return fn()
+    except Exception as exc:
+        log.warning(f"{label or 'API'}: {exc!r}")
+        return default
 
 
 # ── Garmin-Login ────────────────────────────────────────────────────────────
-# Token-Speicherort (garminconnect 0.3.x Standard)
-TOKEN_DIR = Path.home() / ".garminconnect"
-
 def login():
     try:
-        from garminconnect import (
-            Garmin,
-            GarminConnectAuthenticationError,
-            GarminConnectConnectionError,
-        )
+        from garminconnect import Garmin, GarminConnectAuthenticationError, GarminConnectConnectionError
     except ImportError:
-        log.error("garminconnect nicht installiert. Bitte: pip install 'garminconnect>=0.3.0'")
+        log.error("garminconnect nicht installiert: pip3 install 'garminconnect>=0.3.0'")
         sys.exit(1)
 
-    # ── Weg 1: Token aus Umgebungsvariable (GitHub Actions CI) ───────────────
+    # Weg 1: Token aus CI-Secret
     token_str = os.environ.get("GARMIN_TOKENS", "").strip()
     if token_str:
-        log.info("GARMIN_TOKENS Secret gefunden — schreibe Token-Datei...")
-        try:
-            TOKEN_DIR.mkdir(mode=0o700, exist_ok=True)
-            token_file = TOKEN_DIR / "garmin_tokens.json"
-            token_file.write_text(token_str)
-            token_file.chmod(0o600)
-            log.info("Token-Datei geschrieben. Lade Session...")
-            api = Garmin(email="", password="", prompt_mfa=get_mfa)
-            api.login(str(TOKEN_DIR))
-            log.info("✓ Login via Token — kein MFA nötig.")
-            return api
-        except Exception as exc:
-            log.warning(f"Token-Login fehlgeschlagen: {exc!r} — versuche normalen Login...")
-
-    # ── Weg 2: Lokaler Token-Cache vorhanden (nach erstem lokalem Login) ─────
-    local_token = TOKEN_DIR / "garmin_tokens.json"
-    if local_token.exists():
-        log.info(f"Lokaler Token gefunden ({local_token}) — lade Session...")
-        try:
-            email, password = get_credentials()
-            api = Garmin(email=email, password=password, prompt_mfa=get_mfa)
-            api.login(str(TOKEN_DIR))
-            log.info("✓ Login via lokalem Token — kein MFA nötig.")
-            return api
-        except Exception as exc:
-            log.warning(f"Lokaler Token abgelaufen: {exc!r} — neuer Login...")
-
-    # ── Weg 3: Frischer interaktiver Login mit MFA ────────────────────────────
-    email, password = get_credentials()
-    log.info("Interaktiver Login (MFA-Code wird ggf. abgefragt)...")
-    api = Garmin(email=email, password=password, prompt_mfa=get_mfa)
-    try:
+        log.info("GARMIN_TOKENS gefunden — schreibe Token-Datei...")
         TOKEN_DIR.mkdir(mode=0o700, exist_ok=True)
-        api.login(str(TOKEN_DIR))   # speichert Token automatisch in TOKEN_DIR
-    except GarminConnectAuthenticationError as exc:
-        log.error(f"Authentifizierung fehlgeschlagen: {exc}")
-        sys.exit(1)
-    except GarminConnectConnectionError as exc:
-        log.error(f"Verbindungsfehler: {exc}")
-        sys.exit(1)
+        tf = TOKEN_DIR / "garmin_tokens.json"
+        tf.write_text(token_str)
+        tf.chmod(0o600)
+        api = Garmin(email="", password="", prompt_mfa=get_mfa)
+        api.login(str(TOKEN_DIR))
+        log.info("✓ Login via CI-Token")
+        return api
 
-    log.info(f"✓ Login erfolgreich. Token gespeichert: {TOKEN_DIR}/garmin_tokens.json")
-    log.info("→ Jetzt 'python export_token.py' ausführen um GitHub Secret zu erstellen.")
+    # Weg 2: Lokaler Token-Cache
+    if (TOKEN_DIR / "garmin_tokens.json").exists():
+        log.info("Lokaler Token gefunden...")
+        email, pw = get_credentials()
+        api = Garmin(email=email, password=pw, prompt_mfa=get_mfa)
+        api.login(str(TOKEN_DIR))
+        log.info("✓ Login via lokalem Token")
+        return api
+
+    # Weg 3: Interaktiver Login
+    email, pw = get_credentials()
+    log.info("Interaktiver Login (MFA-Code wird ggf. abgefragt)...")
+    api = Garmin(email=email, password=pw, prompt_mfa=get_mfa)
+    TOKEN_DIR.mkdir(mode=0o700, exist_ok=True)
+    api.login(str(TOKEN_DIR))
+    log.info(f"✓ Login — Token gespeichert: {TOKEN_DIR}/garmin_tokens.json")
     return api
 
 
-# ── Datenabruf ──────────────────────────────────────────────────────────────
+# ── Einzel-Tag Metriken ─────────────────────────────────────────────────────
 def fetch_hrv(api, today_str, yesterday_str):
-    raw = safe_call(lambda: api.get_hrv_data(today_str), "HRV (heute)")
+    raw = safe(lambda: api.get_hrv_data(today_str), "HRV heute")
     if raw is None:
-        raw = safe_call(lambda: api.get_hrv_data(yesterday_str), "HRV (gestern)")
-
-    result = {
-        "lastNight": None,
-        "status": "UNKNOWN",
-        "weeklyAvg": None,
-        "balancedLow": None,
-        "balancedHigh": None,
-    }
+        raw = safe(lambda: api.get_hrv_data(yesterday_str), "HRV gestern")
+    result = {"lastNight": None, "status": "UNKNOWN", "weeklyAvg": None, "balancedLow": None, "balancedHigh": None}
     if not raw:
         return result
-    try:
-        summary = raw.get("hrvSummary", {})
-        nightly = raw.get("lastNight", {})
-        result["lastNight"] = nightly.get("lastNight") or nightly.get("value")
-        result["status"] = summary.get("status", "UNKNOWN")
-        result["weeklyAvg"] = summary.get("weeklyAvg")
-        result["balancedLow"] = summary.get("balancedLow")
-        result["balancedHigh"] = summary.get("balancedHigh")
-    except Exception as exc:
-        log.warning(f"HRV Parsing-Fehler: {exc!r}")
+    summary = raw.get("hrvSummary", {})
+    nightly = raw.get("lastNight", {})
+    result["lastNight"]    = nightly.get("lastNight") or nightly.get("value")
+    result["status"]       = summary.get("status", "UNKNOWN")
+    result["weeklyAvg"]    = summary.get("weeklyAvg")
+    result["balancedLow"]  = summary.get("balancedLow")
+    result["balancedHigh"] = summary.get("balancedHigh")
     return result
 
 
-def fetch_body_battery(api, today):
-    history = []
-    for i in range(7):
-        day = (today - timedelta(days=i)).isoformat()
-        raw = safe_call(
-            lambda d=day: api.get_body_battery(d, d),
-            f"Body Battery {day}",
-        )
-        if raw and isinstance(raw, list) and raw:
-            entry = raw[0]
-            history.append({
-                "date": day,
-                "charged": entry.get("charged"),
-                "drained": entry.get("drained"),
-                "endValue": entry.get("endValue"),
-            })
-
-    current = history[0].get("endValue") if history else None
-    return {"current": current, "history": history}
-
-
-def fetch_rhr(api, today_str, yesterday_str):
-    raw = safe_call(lambda: api.get_rhr_day(today_str), "RHR (heute)")
-    if raw is None:
-        raw = safe_call(lambda: api.get_rhr_day(yesterday_str), "RHR (gestern)")
+def fetch_rhr(api, date_str):
+    raw = safe(lambda: api.get_rhr_day(date_str), f"RHR {date_str}")
     if not raw:
         return None
-    # Verschiedene API-Antwortformate abdecken
     try:
-        metrics = raw.get("allMetrics", {}).get("metricsMap", {})
+        metrics  = raw.get("allMetrics", {}).get("metricsMap", {})
         rhr_list = metrics.get("WELLNESS_RESTING_HEART_RATE", [])
         if rhr_list:
             return rhr_list[0].get("value")
@@ -209,39 +134,26 @@ def fetch_rhr(api, today_str, yesterday_str):
     return raw.get("restingHeartRate") or raw.get("value")
 
 
-def fetch_sleep(api, today_str, yesterday_str):
-    raw = safe_call(lambda: api.get_sleep_data(today_str), "Schlaf (heute)")
-    if raw is None:
-        raw = safe_call(lambda: api.get_sleep_data(yesterday_str), "Schlaf (gestern)")
-
-    result = {
-        "score": None,
-        "totalSeconds": None,
-        "deepSeconds": None,
-        "lightSeconds": None,
-        "remSeconds": None,
-        "awakeSeconds": None,
+def fetch_sleep_day(api, date_str):
+    raw = safe(lambda: api.get_sleep_data(date_str), f"Schlaf {date_str}")
+    if not raw:
+        return {}
+    dto = raw.get("dailySleepDTO", {})
+    scores = dto.get("sleepScores", {}).get("overall", {})
+    return {
+        "score":        scores.get("value") or dto.get("sleepScore"),
+        "totalSeconds": dto.get("sleepTimeSeconds"),
+        "deepSeconds":  dto.get("deepSleepSeconds"),
+        "lightSeconds": dto.get("lightSleepSeconds"),
+        "remSeconds":   dto.get("remSleepSeconds"),
+        "awakeSeconds": dto.get("awakeSleepSeconds"),
     }
-    if not raw:
-        return result
-    try:
-        dto = raw.get("dailySleepDTO", {})
-        scores = dto.get("sleepScores", {}).get("overall", {})
-        result["score"] = scores.get("value") or dto.get("sleepScore")
-        result["totalSeconds"] = dto.get("sleepTimeSeconds")
-        result["deepSeconds"] = dto.get("deepSleepSeconds")
-        result["lightSeconds"] = dto.get("lightSleepSeconds")
-        result["remSeconds"] = dto.get("remSleepSeconds")
-        result["awakeSeconds"] = dto.get("awakeSleepSeconds")
-    except Exception as exc:
-        log.warning(f"Schlaf Parsing-Fehler: {exc!r}")
-    return result
 
 
-def fetch_stress(api, today_str):
-    raw = safe_call(lambda: api.get_stress_data(today_str), "Stress")
+def fetch_stress_day(api, date_str):
+    raw = safe(lambda: api.get_stress_data(date_str), f"Stress {date_str}")
     if not raw:
-        return {"avgStressLevel": None, "maxStressLevel": None}
+        return {}
     return {
         "avgStressLevel": raw.get("avgStressLevel"),
         "maxStressLevel": raw.get("maxStressLevel"),
@@ -249,79 +161,230 @@ def fetch_stress(api, today_str):
 
 
 def fetch_vo2max(api, today_str):
-    raw = safe_call(lambda: api.get_stats(today_str), "VO2max / Stats")
+    raw = safe(lambda: api.get_stats(today_str), "VO2max/Stats")
     if not raw:
         return None
     return raw.get("vo2Max") or raw.get("maxMetValue")
 
 
-def fetch_last_activity(api):
-    raw = safe_call(lambda: api.get_activities(0, 1), "Letzte Aktivität")
-    if not raw or not isinstance(raw, list) or not raw:
+def fetch_training_readiness(api, today_str):
+    raw = safe(lambda: api.get_training_readiness(today_str), "Training Readiness")
+    if not raw:
         return None
-    act = raw[0]
-    return {
-        "name": act.get("activityName"),
-        "type": act.get("activityType", {}).get("typeKey"),
-        "distanceMeters": act.get("distance"),
-        "durationSeconds": act.get("duration"),
-        "avgHr": act.get("averageHR"),
-        "maxHr": act.get("maxHR"),
-        "calories": act.get("calories"),
-        "startTime": act.get("startTimeLocal"),
-    }
+    if isinstance(raw, list) and raw:
+        entry = raw[0]
+        return entry.get("score") or entry.get("trainingReadinessScore")
+    if isinstance(raw, dict):
+        return raw.get("score") or raw.get("trainingReadinessScore")
+    return None
+
+
+# ── 30-Tage History ─────────────────────────────────────────────────────────
+def fetch_body_battery_range(api, start_str, end_str):
+    """Gibt dict date→{charged,drained,endValue} zurück."""
+    result = {}
+    raw = safe(lambda: api.get_body_battery(start_str, end_str), "Body Battery Range")
+    if not raw or not isinstance(raw, list):
+        return result
+    for entry in raw:
+        d = entry.get("date", "")
+        if d:
+            result[d] = {
+                "charged":  entry.get("charged"),
+                "drained":  entry.get("drained"),
+                "endValue": entry.get("endValue"),
+            }
+    return result
+
+
+def fetch_daily_steps_range(api, start_str, end_str):
+    """Gibt dict date→steps zurück."""
+    result = {}
+    # Versuche Range-Call zuerst
+    raw = safe(lambda: api.get_daily_steps_data(start_str, end_str), "Steps Range")
+    if raw and isinstance(raw, list):
+        for item in raw:
+            d = (item.get("calendarDate") or item.get("startGMT", "")[:10] or "").strip()
+            steps = item.get("totalSteps") or item.get("steps")
+            if d and steps is not None:
+                result[d] = steps
+    return result
+
+
+def fetch_activities_list(api, limit=30):
+    raw = safe(lambda: api.get_activities(0, limit), "Aktivitätsliste")
+    if not raw or not isinstance(raw, list):
+        return []
+    out = []
+    for a in raw:
+        out.append({
+            "date":            (a.get("startTimeLocal") or "")[:10],
+            "name":            a.get("activityName", ""),
+            "type":            a.get("activityType", {}).get("typeKey", ""),
+            "distanceMeters":  a.get("distance"),
+            "durationSeconds": a.get("duration"),
+            "avgHr":           a.get("averageHR"),
+            "maxHr":           a.get("maxHR"),
+            "calories":        a.get("calories"),
+        })
+    return out
+
+
+def build_history(api, today, bb_range, steps_range):
+    """
+    Baut das history.days Array für 30 Tage.
+    Macht einen API-Call pro Tag für HRV / RHR / Schlaf / Stress.
+    Kleine Sleep-Delays zwischen Tagen um Rate-Limiting zu vermeiden.
+    """
+    days = []
+    for i in range(30):
+        d = (today - timedelta(days=i)).isoformat()
+
+        # Schnelle Daten aus Vorarbeiten
+        bb    = bb_range.get(d, {})
+        steps = steps_range.get(d)
+
+        day = {
+            "date":      d,
+            "bbCharged": bb.get("charged"),
+            "bbDrained": bb.get("drained"),
+            "steps":     steps,
+        }
+
+        # Pro-Tag API-Calls (mit Delay)
+        if i > 0:
+            time.sleep(0.3)   # Rate-Limiting vermeiden
+
+        # Sleep
+        sleep = fetch_sleep_day(api, d)
+        day["sleepScore"]   = sleep.get("score")
+        day["sleepSeconds"] = sleep.get("totalSeconds")
+
+        # Stress
+        stress = fetch_stress_day(api, d)
+        day["avgStress"] = stress.get("avgStressLevel")
+
+        # RHR (nur alle 3 Tage um Rate-Limit zu schonen — täglich langsam)
+        if i % 2 == 0:
+            time.sleep(0.2)
+        rhr = fetch_rhr(api, d)
+        day["rhr"] = rhr
+
+        # HRV (lastNight — oft null bei manchen Geräten)
+        hrv_raw = safe(lambda dd=d: api.get_hrv_data(dd), f"HRV {d}")
+        if hrv_raw:
+            nightly = hrv_raw.get("lastNight", {})
+            day["hrv"] = nightly.get("lastNight") or nightly.get("value")
+        else:
+            day["hrv"] = None
+
+        days.append(day)
+        log.info(f"  {d}: sleep={day['sleepScore']}, stress={day['avgStress']}, rhr={day['rhr']}, hrv={day['hrv']}, steps={steps}")
+
+    return days   # newest first
 
 
 # ── Hauptprogramm ───────────────────────────────────────────────────────────
 def main():
     api = login()
 
-    today = date.today()
+    today     = date.today()
     today_str = today.isoformat()
-    yesterday_str = (today - timedelta(days=1)).isoformat()
+    yest_str  = (today - timedelta(days=1)).isoformat()
+    start_30  = (today - timedelta(days=29)).isoformat()
 
-    log.info("── Starte Datenabruf ──────────────────────────────────────────")
+    log.info("════ Starte Datenabruf ════════════════════════════════════════")
 
+    # ── Heutige Einzelwerte ─────────────────────────────────────────────────
     log.info("HRV...")
-    hrv = fetch_hrv(api, today_str, yesterday_str)
+    hrv = fetch_hrv(api, today_str, yest_str)
 
-    log.info("Body Battery (7 Tage)...")
-    body_battery = fetch_body_battery(api, today)
+    log.info("Ruhepuls heute...")
+    rhr_today = fetch_rhr(api, today_str) or fetch_rhr(api, yest_str)
 
-    log.info("Ruhepuls...")
-    rhr = fetch_rhr(api, today_str, yesterday_str)
+    log.info("Schlaf heute...")
+    sleep = fetch_sleep_day(api, today_str)
+    if not sleep.get("score"):
+        sleep = fetch_sleep_day(api, yest_str)
 
-    log.info("Schlaf...")
-    sleep = fetch_sleep(api, today_str, yesterday_str)
-
-    log.info("Stress...")
-    stress = fetch_stress(api, today_str)
+    log.info("Stress heute...")
+    stress = fetch_stress_day(api, today_str)
 
     log.info("VO2max...")
     vo2max = fetch_vo2max(api, today_str)
 
-    log.info("Letzte Aktivität...")
-    last_activity = fetch_last_activity(api)
+    log.info("Training Readiness...")
+    training_readiness = fetch_training_readiness(api, today_str)
 
-    log.info("── Datenabruf abgeschlossen ───────────────────────────────────")
+    # ── Range-Abfragen (effizient) ──────────────────────────────────────────
+    log.info("Body Battery (30 Tage Range)...")
+    bb_range = fetch_body_battery_range(api, start_30, today_str)
 
+    log.info("Schritte (30 Tage Range)...")
+    steps_range = fetch_daily_steps_range(api, start_30, today_str)
+
+    log.info("Aktivitätsliste (30 Einträge)...")
+    activities = fetch_activities_list(api, limit=30)
+
+    # Heutige Body Battery aus Range
+    bb_today = bb_range.get(today_str, {})
+    body_battery = {
+        "current":   bb_today.get("endValue"),
+        "charged":   bb_today.get("charged"),
+        "drained":   bb_today.get("drained"),
+        "history":   sorted(
+            [{"date": d, **v} for d, v in bb_range.items()],
+            key=lambda x: x["date"], reverse=True
+        )[:30],
+    }
+
+    # Heutige Schritte
+    steps_today = steps_range.get(today_str)
+
+    # Letzte Aktivität
+    last_activity = activities[0] if activities else None
+
+    # ── 30-Tage-History (Tag-für-Tag) ───────────────────────────────────────
+    log.info("════ 30-Tage-History (dauert ~2 min) ══════════════════════════")
+    history_days = build_history(api, today, bb_range, steps_range)
+
+    log.info("════ Datenabruf abgeschlossen ══════════════════════════════════")
+
+    # ── JSON zusammenstellen ────────────────────────────────────────────────
     data = {
-        "updated_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "hrv": hrv,
-        "bodyBattery": body_battery,
-        "restingHeartRate": rhr,
-        "sleep": sleep,
-        "stress": stress,
-        "vo2max": vo2max,
-        "lastActivity": last_activity,
+        "updated_at":         datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        # Heutige Werte (Rückwärtskompatibilität)
+        "hrv":                hrv,
+        "bodyBattery":        body_battery,
+        "restingHeartRate":   rhr_today,
+        "sleep":              sleep,
+        "stress":             stress,
+        "vo2max":             vo2max,
+        "trainingReadiness":  training_readiness,
+        "stepsToday":         steps_today,
+        "lastActivity":       last_activity,
+        # 30-Tage History
+        "history": {
+            "days":       history_days,
+            "activities": activities,
+        },
     }
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
-    log.info(f"✓ Daten gespeichert → {OUT_PATH}")
-    print(json.dumps(data, indent=2, ensure_ascii=False))
+    log.info(f"✓ Gespeichert → {OUT_PATH}")
+    # Kurze Zusammenfassung
+    print(f"\n{'─'*50}")
+    print(f"  Schlaf-Score:       {sleep.get('score')}")
+    print(f"  HRV Status:         {hrv.get('status')}")
+    print(f"  Ruhepuls:           {rhr_today} bpm")
+    print(f"  Training Readiness: {training_readiness}")
+    print(f"  Schritte heute:     {steps_today}")
+    print(f"  Aktivitäten:        {len(activities)}")
+    print(f"  History Tage:       {len(history_days)}")
+    print(f"{'─'*50}\n")
 
 
 if __name__ == "__main__":

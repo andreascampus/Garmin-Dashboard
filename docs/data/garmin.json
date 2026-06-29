@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-29T13:31:26Z",
+  "updated_at": "2026-06-29T17:59:14Z",
   "hrv": {
     "lastNight": null,
     "status": "LOW",
@@ -9,11 +9,13 @@
   },
   "bodyBattery": {
     "current": null,
+    "charged": 63,
+    "drained": 72,
     "history": [
       {
         "date": "2026-06-29",
         "charged": 63,
-        "drained": 52,
+        "drained": 72,
         "endValue": null
       },
       {
@@ -51,6 +53,144 @@
         "charged": 92,
         "drained": 73,
         "endValue": null
+      },
+      {
+        "date": "2026-06-22",
+        "charged": 81,
+        "drained": 87,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-21",
+        "charged": 90,
+        "drained": 74,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-20",
+        "charged": 62,
+        "drained": 55,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-19",
+        "charged": 68,
+        "drained": 86,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-18",
+        "charged": 86,
+        "drained": 85,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-17",
+        "charged": 77,
+        "drained": 84,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-16",
+        "charged": 57,
+        "drained": 74,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-15",
+        "charged": 87,
+        "drained": 59,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-14",
+        "charged": 80,
+        "drained": 83,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-13",
+        "charged": 71,
+        "drained": 40,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-12",
+        "charged": 75,
+        "drained": 82,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-11",
+        "charged": 56,
+        "drained": 74,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-10",
+        "charged": 62,
+        "drained": 62,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-09",
+        "charged": 103,
+        "drained": 66,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-08",
+        "charged": 81,
+        "drained": 85,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-07",
+        "charged": 73,
+        "drained": 70,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-06",
+        "charged": 79,
+        "drained": 76,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-05",
+        "charged": 80,
+        "drained": 71,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-04",
+        "charged": 17,
+        "drained": 81,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-03",
+        "charged": 61,
+        "drained": 59,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-02",
+        "charged": 80,
+        "drained": 77,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-01",
+        "charged": 101,
+        "drained": 72,
+        "endValue": null
+      },
+      {
+        "date": "2026-05-31",
+        "charged": 0,
+        "drained": 4,
+        "endValue": null
       }
     ]
   },
@@ -64,18 +204,656 @@
     "awakeSeconds": 1140
   },
   "stress": {
-    "avgStressLevel": 22,
-    "maxStressLevel": 92
+    "avgStressLevel": 28,
+    "maxStressLevel": 93
   },
   "vo2max": null,
+  "trainingReadiness": 81,
+  "stepsToday": null,
   "lastActivity": {
-    "name": "Lieboch Laufen",
-    "type": "running",
-    "distanceMeters": 3078.39990234375,
-    "durationSeconds": 1161.16796875,
-    "avgHr": 126.0,
-    "maxHr": 147.0,
-    "calories": 222.0,
-    "startTime": "2026-06-29 08:44:23"
+    "date": "2026-06-29",
+    "name": "Krafttrai​ning",
+    "type": "strength_training",
+    "distanceMeters": 0.0,
+    "durationSeconds": 1951.551025390625,
+    "avgHr": 111.0,
+    "maxHr": 136.0,
+    "calories": 214.0
+  },
+  "history": {
+    "days": [
+      {
+        "date": "2026-06-29",
+        "bbCharged": 63,
+        "bbDrained": 72,
+        "steps": null,
+        "sleepScore": 92,
+        "sleepSeconds": 29760,
+        "avgStress": 28,
+        "rhr": 41.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-28",
+        "bbCharged": 65,
+        "bbDrained": 19,
+        "steps": null,
+        "sleepScore": 74,
+        "sleepSeconds": 19920,
+        "avgStress": 10,
+        "rhr": 40.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-27",
+        "bbCharged": 15,
+        "bbDrained": 8,
+        "steps": null,
+        "sleepScore": null,
+        "sleepSeconds": null,
+        "avgStress": 22,
+        "rhr": 43.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-26",
+        "bbCharged": 62,
+        "bbDrained": 69,
+        "steps": null,
+        "sleepScore": 78,
+        "sleepSeconds": 22680,
+        "avgStress": 33,
+        "rhr": 43.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-25",
+        "bbCharged": 85,
+        "bbDrained": 81,
+        "steps": null,
+        "sleepScore": 86,
+        "sleepSeconds": 27300,
+        "avgStress": 27,
+        "rhr": 43.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-24",
+        "bbCharged": 75,
+        "bbDrained": 86,
+        "steps": null,
+        "sleepScore": 97,
+        "sleepSeconds": 28200,
+        "avgStress": 31,
+        "rhr": 41.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-23",
+        "bbCharged": 92,
+        "bbDrained": 73,
+        "steps": null,
+        "sleepScore": 86,
+        "sleepSeconds": 24540,
+        "avgStress": 23,
+        "rhr": 42.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-22",
+        "bbCharged": 81,
+        "bbDrained": 87,
+        "steps": null,
+        "sleepScore": 87,
+        "sleepSeconds": 26149,
+        "avgStress": 35,
+        "rhr": 43.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-21",
+        "bbCharged": 90,
+        "bbDrained": 74,
+        "steps": null,
+        "sleepScore": 97,
+        "sleepSeconds": 27300,
+        "avgStress": 30,
+        "rhr": 44.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-20",
+        "bbCharged": 62,
+        "bbDrained": 55,
+        "steps": null,
+        "sleepScore": 74,
+        "sleepSeconds": 26040,
+        "avgStress": 39,
+        "rhr": 46.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-19",
+        "bbCharged": 68,
+        "bbDrained": 86,
+        "steps": null,
+        "sleepScore": 87,
+        "sleepSeconds": 27960,
+        "avgStress": 33,
+        "rhr": 43.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-18",
+        "bbCharged": 86,
+        "bbDrained": 85,
+        "steps": null,
+        "sleepScore": 89,
+        "sleepSeconds": 28200,
+        "avgStress": 34,
+        "rhr": 45.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-17",
+        "bbCharged": 77,
+        "bbDrained": 84,
+        "steps": null,
+        "sleepScore": 83,
+        "sleepSeconds": 25320,
+        "avgStress": 33,
+        "rhr": 42.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-16",
+        "bbCharged": 57,
+        "bbDrained": 74,
+        "steps": null,
+        "sleepScore": 91,
+        "sleepSeconds": 26160,
+        "avgStress": 22,
+        "rhr": 41.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-15",
+        "bbCharged": 87,
+        "bbDrained": 59,
+        "steps": null,
+        "sleepScore": 100,
+        "sleepSeconds": 30600,
+        "avgStress": 19,
+        "rhr": 44.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-14",
+        "bbCharged": 80,
+        "bbDrained": 83,
+        "steps": null,
+        "sleepScore": 84,
+        "sleepSeconds": 25080,
+        "avgStress": 31,
+        "rhr": 42.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-13",
+        "bbCharged": 71,
+        "bbDrained": 40,
+        "steps": null,
+        "sleepScore": 95,
+        "sleepSeconds": 28740,
+        "avgStress": 20,
+        "rhr": 41.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-12",
+        "bbCharged": 75,
+        "bbDrained": 82,
+        "steps": null,
+        "sleepScore": 76,
+        "sleepSeconds": 20940,
+        "avgStress": 26,
+        "rhr": 41.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-11",
+        "bbCharged": 56,
+        "bbDrained": 74,
+        "steps": null,
+        "sleepScore": 94,
+        "sleepSeconds": 29460,
+        "avgStress": 19,
+        "rhr": 40.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-10",
+        "bbCharged": 62,
+        "bbDrained": 62,
+        "steps": null,
+        "sleepScore": 92,
+        "sleepSeconds": 27060,
+        "avgStress": 17,
+        "rhr": 40.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-09",
+        "bbCharged": 103,
+        "bbDrained": 66,
+        "steps": null,
+        "sleepScore": 88,
+        "sleepSeconds": 25380,
+        "avgStress": 19,
+        "rhr": 41.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-08",
+        "bbCharged": 81,
+        "bbDrained": 85,
+        "steps": null,
+        "sleepScore": 86,
+        "sleepSeconds": 27240,
+        "avgStress": 35,
+        "rhr": 43.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-07",
+        "bbCharged": 73,
+        "bbDrained": 70,
+        "steps": null,
+        "sleepScore": 94,
+        "sleepSeconds": 28140,
+        "avgStress": 35,
+        "rhr": 43.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-06",
+        "bbCharged": 79,
+        "bbDrained": 76,
+        "steps": null,
+        "sleepScore": 86,
+        "sleepSeconds": 25723,
+        "avgStress": 23,
+        "rhr": 42.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-05",
+        "bbCharged": 80,
+        "bbDrained": 71,
+        "steps": null,
+        "sleepScore": 90,
+        "sleepSeconds": 29340,
+        "avgStress": 23,
+        "rhr": 43.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-04",
+        "bbCharged": 17,
+        "bbDrained": 81,
+        "steps": null,
+        "sleepScore": null,
+        "sleepSeconds": null,
+        "avgStress": 42,
+        "rhr": 45.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-03",
+        "bbCharged": 61,
+        "bbDrained": 59,
+        "steps": null,
+        "sleepScore": 88,
+        "sleepSeconds": 25951,
+        "avgStress": 21,
+        "rhr": 40.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-02",
+        "bbCharged": 80,
+        "bbDrained": 77,
+        "steps": null,
+        "sleepScore": 91,
+        "sleepSeconds": 26280,
+        "avgStress": 24,
+        "rhr": 41.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-06-01",
+        "bbCharged": 101,
+        "bbDrained": 72,
+        "steps": null,
+        "sleepScore": 98,
+        "sleepSeconds": 28020,
+        "avgStress": 21,
+        "rhr": 40.0,
+        "hrv": null
+      },
+      {
+        "date": "2026-05-31",
+        "bbCharged": 0,
+        "bbDrained": 4,
+        "steps": null,
+        "sleepScore": null,
+        "sleepSeconds": null,
+        "avgStress": 31,
+        "rhr": 41.0,
+        "hrv": null
+      }
+    ],
+    "activities": [
+      {
+        "date": "2026-06-29",
+        "name": "Krafttrai​ning",
+        "type": "strength_training",
+        "distanceMeters": 0.0,
+        "durationSeconds": 1951.551025390625,
+        "avgHr": 111.0,
+        "maxHr": 136.0,
+        "calories": 214.0
+      },
+      {
+        "date": "2026-06-29",
+        "name": "Lieboch Laufen",
+        "type": "running",
+        "distanceMeters": 3078.39990234375,
+        "durationSeconds": 1161.16796875,
+        "avgHr": 126.0,
+        "maxHr": 147.0,
+        "calories": 222.0
+      },
+      {
+        "date": "2026-06-28",
+        "name": "Lieboch Rennradfahren",
+        "type": "road_biking",
+        "distanceMeters": 11778.759765625,
+        "durationSeconds": 1907.616943359375,
+        "avgHr": null,
+        "maxHr": null,
+        "calories": 239.0
+      },
+      {
+        "date": "2026-06-25",
+        "name": "Krafttrai​ning",
+        "type": "strength_training",
+        "distanceMeters": 0.0,
+        "durationSeconds": 2118.51611328125,
+        "avgHr": 101.0,
+        "maxHr": 133.0,
+        "calories": 187.0
+      },
+      {
+        "date": "2026-06-24",
+        "name": "Lieboch Rennradfahren",
+        "type": "road_biking",
+        "distanceMeters": 21811.220703125,
+        "durationSeconds": 2667.783935546875,
+        "avgHr": null,
+        "maxHr": null,
+        "calories": 558.0
+      },
+      {
+        "date": "2026-06-23",
+        "name": "Krafttrai​ning",
+        "type": "strength_training",
+        "distanceMeters": 0.0,
+        "durationSeconds": 3830.9150390625,
+        "avgHr": 107.0,
+        "maxHr": 157.0,
+        "calories": 370.0
+      },
+      {
+        "date": "2026-06-21",
+        "name": "Krafttrai​ning",
+        "type": "strength_training",
+        "distanceMeters": 0.0,
+        "durationSeconds": 4110.83203125,
+        "avgHr": 88.0,
+        "maxHr": 133.0,
+        "calories": 256.0
+      },
+      {
+        "date": "2026-06-20",
+        "name": "Lieboch Laufen",
+        "type": "running",
+        "distanceMeters": 1858.030029296875,
+        "durationSeconds": 668.2839965820312,
+        "avgHr": 122.0,
+        "maxHr": 146.0,
+        "calories": 126.0
+      },
+      {
+        "date": "2026-06-20",
+        "name": "Krieglach Rennradfahren",
+        "type": "road_biking",
+        "distanceMeters": 57027.421875,
+        "durationSeconds": 7813.19921875,
+        "avgHr": null,
+        "maxHr": null,
+        "calories": 1234.0
+      },
+      {
+        "date": "2026-06-18",
+        "name": "Lieboch Laufen",
+        "type": "running",
+        "distanceMeters": 3343.110107421875,
+        "durationSeconds": 1276.843994140625,
+        "avgHr": 144.0,
+        "maxHr": 166.0,
+        "calories": 254.0
+      },
+      {
+        "date": "2026-06-17",
+        "name": "Lieboch Rennradfahren",
+        "type": "road_biking",
+        "distanceMeters": 42974.7109375,
+        "durationSeconds": 5416.69677734375,
+        "avgHr": null,
+        "maxHr": null,
+        "calories": 1141.0
+      },
+      {
+        "date": "2026-06-16",
+        "name": "Krafttrai​ning",
+        "type": "strength_training",
+        "distanceMeters": 0.0,
+        "durationSeconds": 4096.18994140625,
+        "avgHr": 102.0,
+        "maxHr": 133.0,
+        "calories": 358.0
+      },
+      {
+        "date": "2026-06-13",
+        "name": "Lieboch Rennradfahren",
+        "type": "road_biking",
+        "distanceMeters": 19921.48046875,
+        "durationSeconds": 3281.218994140625,
+        "avgHr": null,
+        "maxHr": null,
+        "calories": 496.0
+      },
+      {
+        "date": "2026-06-12",
+        "name": "Krafttrai​ning",
+        "type": "strength_training",
+        "distanceMeters": 0.0,
+        "durationSeconds": 4387.52392578125,
+        "avgHr": 109.0,
+        "maxHr": 156.0,
+        "calories": 436.0
+      },
+      {
+        "date": "2026-06-10",
+        "name": "Krafttrai​ning",
+        "type": "strength_training",
+        "distanceMeters": 0.0,
+        "durationSeconds": 2616.1708984375,
+        "avgHr": 98.0,
+        "maxHr": 124.0,
+        "calories": 215.0
+      },
+      {
+        "date": "2026-06-09",
+        "name": "Krafttrai​ning",
+        "type": "strength_training",
+        "distanceMeters": 0.0,
+        "durationSeconds": 3602.951904296875,
+        "avgHr": 99.0,
+        "maxHr": 156.0,
+        "calories": 303.0
+      },
+      {
+        "date": "2026-06-08",
+        "name": "Lieboch Rennradfahren",
+        "type": "road_biking",
+        "distanceMeters": 24053.220703125,
+        "durationSeconds": 3854.074951171875,
+        "avgHr": null,
+        "maxHr": null,
+        "calories": 540.0
+      },
+      {
+        "date": "2026-06-07",
+        "name": "Lieboch Rennradfahren",
+        "type": "road_biking",
+        "distanceMeters": 56141.73046875,
+        "durationSeconds": 7322.2021484375,
+        "avgHr": null,
+        "maxHr": null,
+        "calories": 1389.0
+      },
+      {
+        "date": "2026-06-06",
+        "name": "Krafttrai​ning",
+        "type": "strength_training",
+        "distanceMeters": 0.0,
+        "durationSeconds": 3188.554931640625,
+        "avgHr": 101.0,
+        "maxHr": 154.0,
+        "calories": 268.0
+      },
+      {
+        "date": "2026-06-05",
+        "name": "Krafttrai​ning",
+        "type": "strength_training",
+        "distanceMeters": 0.0,
+        "durationSeconds": 2487.0830078125,
+        "avgHr": 104.0,
+        "maxHr": 141.0,
+        "calories": 237.0
+      },
+      {
+        "date": "2026-06-04",
+        "name": "Lieboch Rennradfahren",
+        "type": "road_biking",
+        "distanceMeters": 68838.2109375,
+        "durationSeconds": 9188.1591796875,
+        "avgHr": null,
+        "maxHr": null,
+        "calories": 1700.0
+      },
+      {
+        "date": "2026-06-03",
+        "name": "Krafttrai​ning",
+        "type": "strength_training",
+        "distanceMeters": 0.0,
+        "durationSeconds": 1313.9949951171875,
+        "avgHr": 99.0,
+        "maxHr": 129.0,
+        "calories": 118.0
+      },
+      {
+        "date": "2026-06-02",
+        "name": "Krafttrai​ning",
+        "type": "strength_training",
+        "distanceMeters": 0.0,
+        "durationSeconds": 2903.4169921875,
+        "avgHr": 109.0,
+        "maxHr": 156.0,
+        "calories": 301.0
+      },
+      {
+        "date": "2026-05-31",
+        "name": "Lieboch Rennradfahren",
+        "type": "road_biking",
+        "distanceMeters": 991.3300170898438,
+        "durationSeconds": 207.06199645996094,
+        "avgHr": null,
+        "maxHr": null,
+        "calories": 17.0
+      },
+      {
+        "date": "2026-05-31",
+        "name": "Lieboch Rennradfahren",
+        "type": "road_biking",
+        "distanceMeters": 32510.0390625,
+        "durationSeconds": 4692.2900390625,
+        "avgHr": null,
+        "maxHr": null,
+        "calories": 716.0
+      },
+      {
+        "date": "2026-05-28",
+        "name": "Lieboch Laufen",
+        "type": "running",
+        "distanceMeters": 6642.10009765625,
+        "durationSeconds": 2284.416015625,
+        "avgHr": 150.0,
+        "maxHr": 162.0,
+        "calories": 510.0
+      },
+      {
+        "date": "2026-05-27",
+        "name": "Krafttrai​ning",
+        "type": "strength_training",
+        "distanceMeters": 0.0,
+        "durationSeconds": 3800.06494140625,
+        "avgHr": 116.0,
+        "maxHr": 156.0,
+        "calories": 450.0
+      },
+      {
+        "date": "2026-05-25",
+        "name": "Voitsberg Rennradfahren",
+        "type": "road_biking",
+        "distanceMeters": 19958.1796875,
+        "durationSeconds": 2922.580078125,
+        "avgHr": null,
+        "maxHr": null,
+        "calories": 420.0
+      },
+      {
+        "date": "2026-05-25",
+        "name": "Lieboch Rennradfahren",
+        "type": "road_biking",
+        "distanceMeters": 20403.779296875,
+        "durationSeconds": 3216.695068359375,
+        "avgHr": null,
+        "maxHr": null,
+        "calories": 437.0
+      },
+      {
+        "date": "2026-05-24",
+        "name": "Lieboch Rennradfahren",
+        "type": "road_biking",
+        "distanceMeters": 61063.921875,
+        "durationSeconds": 10642.6630859375,
+        "avgHr": null,
+        "maxHr": null,
+        "calories": 1375.0
+      }
+    ]
   }
 }
