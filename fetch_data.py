@@ -80,6 +80,9 @@ def fmt_duration(seconds):
 
 
 # ── Garmin-Login ────────────────────────────────────────────────────────────
+# Token-Speicherort (garminconnect 0.3.x Standard)
+TOKEN_DIR = Path.home() / ".garminconnect"
+
 def login():
     try:
         from garminconnect import (
@@ -88,38 +91,46 @@ def login():
             GarminConnectConnectionError,
         )
     except ImportError:
-        log.error("garminconnect nicht installiert. Bitte: pip install 'garminconnect>=0.2.13'")
+        log.error("garminconnect nicht installiert. Bitte: pip install 'garminconnect>=0.3.0'")
         sys.exit(1)
 
-    # ── Weg 1: Token aus Umgebungsvariable (GitHub Actions) ──────────────────
+    # ── Weg 1: Token aus Umgebungsvariable (GitHub Actions CI) ───────────────
     token_str = os.environ.get("GARMIN_TOKENS", "").strip()
     if token_str:
-        log.info("GARMIN_TOKENS gefunden — Login via gespeichertem Token...")
+        log.info("GARMIN_TOKENS Secret gefunden — schreibe Token-Datei...")
         try:
-            api = Garmin(email="", password="")
-            api.garth.loads(token_str)
-            log.info("Token geladen — kein MFA nötig.")
+            TOKEN_DIR.mkdir(mode=0o700, exist_ok=True)
+            token_file = TOKEN_DIR / "garmin_tokens.json"
+            token_file.write_text(token_str)
+            token_file.chmod(0o600)
+            log.info("Token-Datei geschrieben. Lade Session...")
+            api = Garmin(email="", password="", prompt_mfa=get_mfa)
+            api.login(str(TOKEN_DIR))
+            log.info("✓ Login via Token — kein MFA nötig.")
             return api
         except Exception as exc:
-            log.warning(f"Token ungültig: {exc!r} — falle auf normalen Login zurück...")
+            log.warning(f"Token-Login fehlgeschlagen: {exc!r} — versuche normalen Login...")
 
-    # ── Weg 2: Lokaler Token-Cache (nach erstem lokalem Login) ───────────────
-    if SESSION_DIR.exists():
-        log.info("Lokaler Session-Cache gefunden — versuche Wiederverwendung...")
+    # ── Weg 2: Lokaler Token-Cache vorhanden (nach erstem lokalem Login) ─────
+    local_token = TOKEN_DIR / "garmin_tokens.json"
+    if local_token.exists():
+        log.info(f"Lokaler Token gefunden ({local_token}) — lade Session...")
         try:
-            api = Garmin(email="", password="")
-            api.garth.load(str(SESSION_DIR))
-            log.info("Session-Cache geladen — kein MFA nötig.")
+            email, password = get_credentials()
+            api = Garmin(email=email, password=password, prompt_mfa=get_mfa)
+            api.login(str(TOKEN_DIR))
+            log.info("✓ Login via lokalem Token — kein MFA nötig.")
             return api
         except Exception as exc:
-            log.warning(f"Session-Cache abgelaufen: {exc!r} — neuer Login...")
+            log.warning(f"Lokaler Token abgelaufen: {exc!r} — neuer Login...")
 
-    # ── Weg 3: Interaktiver Login mit MFA (erster lokaler Lauf) ─────────────
+    # ── Weg 3: Frischer interaktiver Login mit MFA ────────────────────────────
     email, password = get_credentials()
     log.info("Interaktiver Login (MFA-Code wird ggf. abgefragt)...")
     api = Garmin(email=email, password=password, prompt_mfa=get_mfa)
     try:
-        api.login()
+        TOKEN_DIR.mkdir(mode=0o700, exist_ok=True)
+        api.login(str(TOKEN_DIR))   # speichert Token automatisch in TOKEN_DIR
     except GarminConnectAuthenticationError as exc:
         log.error(f"Authentifizierung fehlgeschlagen: {exc}")
         sys.exit(1)
@@ -127,27 +138,8 @@ def login():
         log.error(f"Verbindungsfehler: {exc}")
         sys.exit(1)
 
-    # Token lokal speichern (für nächste lokale Läufe)
-    try:
-        SESSION_DIR.mkdir(exist_ok=True)
-        api.garth.dump(str(SESSION_DIR))
-        log.info(f"Session lokal gespeichert: {SESSION_DIR}/")
-    except Exception as exc:
-        log.warning(f"Session-Cache speichern fehlgeschlagen: {exc!r}")
-
-    # Token-String ausgeben → als GitHub Secret GARMIN_TOKENS speichern
-    try:
-        token_export = api.garth.dumps()
-        print("\n" + "=" * 65)
-        print("✓ LOGIN ERFOLGREICH — Token für GitHub Secret:")
-        print("-" * 65)
-        print("Secret-Name:  GARMIN_TOKENS")
-        print("Secret-Value:")
-        print(token_export)
-        print("=" * 65 + "\n")
-    except Exception as exc:
-        log.warning(f"Token-Export fehlgeschlagen: {exc!r}")
-
+    log.info(f"✓ Login erfolgreich. Token gespeichert: {TOKEN_DIR}/garmin_tokens.json")
+    log.info("→ Jetzt 'python export_token.py' ausführen um GitHub Secret zu erstellen.")
     return api
 
 

@@ -1,47 +1,81 @@
 {
-  "updated_at": "2026-06-29T06:00:00Z",
-  "_note": "Beispieldaten — wird täglich von fetch_data.py überschrieben",
+  "updated_at": "2026-06-29T13:08:19Z",
   "hrv": {
-    "lastNight": 52,
-    "status": "BALANCED",
-    "weeklyAvg": 48,
-    "balancedLow": 38,
-    "balancedHigh": 62
+    "lastNight": null,
+    "status": "LOW",
+    "weeklyAvg": 101,
+    "balancedLow": null,
+    "balancedHigh": null
   },
   "bodyBattery": {
-    "current": 73,
+    "current": null,
     "history": [
-      {"date": "2026-06-29", "charged": 82, "drained": 45, "endValue": 73},
-      {"date": "2026-06-28", "charged": 75, "drained": 55, "endValue": 62},
-      {"date": "2026-06-27", "charged": 88, "drained": 40, "endValue": 81},
-      {"date": "2026-06-26", "charged": 70, "drained": 60, "endValue": 58},
-      {"date": "2026-06-25", "charged": 85, "drained": 50, "endValue": 77},
-      {"date": "2026-06-24", "charged": 78, "drained": 48, "endValue": 68},
-      {"date": "2026-06-23", "charged": 90, "drained": 35, "endValue": 85}
+      {
+        "date": "2026-06-29",
+        "charged": 63,
+        "drained": 46,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-28",
+        "charged": 65,
+        "drained": 19,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-27",
+        "charged": 15,
+        "drained": 8,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-26",
+        "charged": 62,
+        "drained": 69,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-25",
+        "charged": 85,
+        "drained": 81,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-24",
+        "charged": 75,
+        "drained": 86,
+        "endValue": null
+      },
+      {
+        "date": "2026-06-23",
+        "charged": 92,
+        "drained": 73,
+        "endValue": null
+      }
     ]
   },
-  "restingHeartRate": 52,
+  "restingHeartRate": 41.0,
   "sleep": {
-    "score": 78,
-    "totalSeconds": 27000,
-    "deepSeconds": 5400,
-    "lightSeconds": 12600,
-    "remSeconds": 7200,
-    "awakeSeconds": 1800
+    "score": 92,
+    "totalSeconds": 29760,
+    "deepSeconds": 4980,
+    "lightSeconds": 16260,
+    "remSeconds": 8520,
+    "awakeSeconds": 1140
   },
   "stress": {
-    "avgStressLevel": 24,
-    "maxStressLevel": 58
+    "avgStressLevel": 18,
+    "maxStressLevel": 92
   },
-  "vo2max": 52.0,
+  "vo2max": null,
   "lastActivity": {
-    "name": "Morgenlauf",
+    "name": "Lieboch Laufen",
     "type": "running",
-    "distanceMeters": 8543,
-    "durationSeconds": 2847,
-    "avgHr": 152,
-    "maxHr": 171,
-    "calories": 612,
-    "startTime": "2026-06-29T07:15:00"
+    "distanceMeters": 3078.39990234375,
+    "durationSeconds": 1161.16796875,
+    "avgHr": 126.0,
+    "maxHr": 147.0,
+    "calories": 222.0,
+    "startTime": "2026-06-29 08:44:23"
   }
 }
