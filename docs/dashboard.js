@@ -853,6 +853,194 @@ function renderActivity(range) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+//  FITNESSALTER CARD
+// ═══════════════════════════════════════════════════════════════════════════
+function renderFitnessAge() {
+  const el = $('fitness-age-body');
+  const fitnessAge = data.fitnessAge;
+
+  // Chronologisches Alter aus Garmin-Profil ist nicht direkt verfügbar,
+  // wir zeigen nur das Fitnessalter + Trend
+  if (fitnessAge == null) {
+    el.innerHTML = `<div class="fa-empty">Fitnessalter nicht verfügbar.<br><small>Garmin benötigt ausreichend Aktivitätsdaten.</small></div>`;
+    return;
+  }
+
+  // Für einen Altersvergleich brauchen wir das echte Alter — hardcode nicht möglich,
+  // also zeigen wir einfach das Fitnessalter prominent.
+  // Farbe: je niedriger desto besser (hier vereinfacht)
+  const color = fitnessAge <= 30 ? '#1ed760' : fitnessAge <= 40 ? '#ffa42b' : '#f3727f';
+
+  el.innerHTML = `
+    <div class="fa-main">
+      <div class="fa-value" style="color:${color}" id="fa-val">—</div>
+      <div class="fa-unit">Jahre</div>
+    </div>
+    <div class="fa-label">BIOLOGISCHES ALTER</div>
+    <div class="fa-sub">Basiert auf VO2max, Ruhepuls &amp; Aktivitätslevel</div>
+    <div class="fa-bar-wrap">
+      <div class="fa-bar-track">
+        <div class="fa-bar-fill" id="fa-fill" style="background:${color}"></div>
+      </div>
+      <div class="fa-bar-labels"><span>20</span><span>40</span><span>60</span><span>80+</span></div>
+    </div>`;
+
+  // Odometer
+  const faEl = document.getElementById('fa-val');
+  if (faEl) countUp(faEl, fitnessAge, 1000);
+
+  // Bar fill (20–80 range mapped to 0–100%)
+  setTimeout(() => {
+    const fill = document.getElementById('fa-fill');
+    if (fill) fill.style.width = `${clamp((fitnessAge - 20) / 60 * 100, 2, 100)}%`;
+  }, 200);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  KÖRPERDATEN CARD (Garmin Index S2)
+// ═══════════════════════════════════════════════════════════════════════════
+function renderBodyComp(range) {
+  destroyChart('bodycomp');
+  const el = $('bodycomp-body');
+  const bc = data.bodyComposition || [];
+  const latest = bc[0] || null;
+
+  if (!latest) {
+    el.innerHTML = `<div class="fa-empty">Keine Waagendaten vorhanden.<br><small>Garmin Index S2 muss mit deinem Account verbunden sein.</small></div>`;
+    return;
+  }
+
+  const w   = latest.weight;
+  const fat = latest.bodyFat;
+  const mus = latest.skeletalMuscle;
+  const bmi = latest.bmi;
+  const bon = latest.boneMass;
+  const wat = latest.bodyWater;
+
+  const wColor  = '#f2f3f4';
+  const fatColor = fat != null ? (fat < 18 ? '#539df5' : fat < 25 ? '#1ed760' : fat < 32 ? '#ffa42b' : '#f3727f') : 'var(--text-muted)';
+  const musColor = mus != null ? (mus >= 45 ? '#1ed760' : mus >= 35 ? '#ffa42b' : '#f3727f') : 'var(--text-muted)';
+
+  if (range === 'today') {
+    el.innerHTML = `
+      <div class="bc-top">
+        <span class="bc-weight" id="bc-w">${w != null ? '—' : '—'}</span>
+        <span class="bc-weight-unit">kg</span>
+      </div>
+      <div class="bc-grid">
+        <div class="bc-metric">
+          <div class="bc-metric-val" style="color:${fatColor}" id="bc-fat">${fat != null ? '—' : '—'}</div>
+          <div class="bc-metric-lbl">KÖRPERFETT %</div>
+        </div>
+        <div class="bc-metric">
+          <div class="bc-metric-val" style="color:${musColor}" id="bc-mus">${mus != null ? '—' : '—'}</div>
+          <div class="bc-metric-lbl">MUSKELN %</div>
+        </div>
+        <div class="bc-metric">
+          <div class="bc-metric-val" id="bc-bmi">${bmi != null ? '—' : '—'}</div>
+          <div class="bc-metric-lbl">BMI</div>
+        </div>
+        <div class="bc-metric">
+          <div class="bc-metric-val" style="color:#539df5" id="bc-wat">${wat != null ? '—' : '—'}</div>
+          <div class="bc-metric-lbl">KÖRPERWASSER %</div>
+        </div>
+      </div>
+      <div class="bc-date">Letzte Messung: ${fmtDate(latest.date)}</div>`;
+
+    // Animate numbers
+    if (w != null)   countUp($('bc-w'),   w,   900, v => v.toFixed(1));
+    if (fat != null) countUp($('bc-fat'), fat, 800, v => v.toFixed(1) + '%');
+    if (mus != null) countUp($('bc-mus'), mus, 800, v => v.toFixed(1) + '%');
+    if (bmi != null) countUp($('bc-bmi'), bmi, 800, v => v.toFixed(1));
+    if (wat != null) countUp($('bc-wat'), wat, 800, v => v.toFixed(1) + '%');
+
+  } else {
+    // Verlauf: Gewicht + Körperfett als Linienchart
+    const days = range === '30d' ? 30 : 90;
+    const slice = bc.slice(0, days);
+    const reversed = [...slice].reverse();
+
+    const labels  = reversed.map(d => {
+      const dt = new Date(d.date + 'T12:00:00');
+      return dt.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+    });
+    const weights  = reversed.map(d => d.weight ?? null);
+    const fatVals  = reversed.map(d => d.bodyFat ?? null);
+
+    el.innerHTML = `
+      <div class="bc-top" style="margin-bottom:6px">
+        <span class="bc-weight">${w != null ? w.toFixed(1) : '—'}</span>
+        <span class="bc-weight-unit">kg</span>
+      </div>
+      <div class="bc-legend-row">
+        <span class="bc-leg"><span style="background:#f2f3f4"></span>Gewicht (kg)</span>
+        <span class="bc-leg"><span style="background:#ffa42b"></span>Körperfett (%)</span>
+      </div>
+      <div class="chart-wrap" style="flex:1"><canvas id="bodycomp-chart"></canvas></div>`;
+
+    charts['bodycomp'] = new Chart($('bodycomp-chart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Gewicht kg',
+            data: weights,
+            borderColor: 'rgba(242,243,244,0.8)',
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            pointRadius: slice.length > 20 ? 2 : 4,
+            pointBackgroundColor: '#f2f3f4',
+            tension: 0.3,
+            spanGaps: true,
+            yAxisID: 'yWeight',
+          },
+          {
+            label: 'Körperfett %',
+            data: fatVals,
+            borderColor: '#ffa42b',
+            backgroundColor: ctx => {
+              const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 120);
+              g.addColorStop(0, 'rgba(255,164,43,0.15)');
+              g.addColorStop(1, 'rgba(255,164,43,0.00)');
+              return g;
+            },
+            borderWidth: 2,
+            pointRadius: slice.length > 20 ? 2 : 4,
+            pointBackgroundColor: '#ffa42b',
+            tension: 0.3,
+            fill: true,
+            spanGaps: true,
+            yAxisID: 'yFat',
+          },
+        ],
+      },
+      options: {
+        ...CHART_DEFAULTS,
+        plugins: {
+          ...CHART_DEFAULTS.plugins,
+          legend: { display: false },
+        },
+        scales: {
+          x: xScaleOpts(),
+          yWeight: {
+            position: 'left',
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            ticks: { color: '#55585f', font: { size: 9 }, callback: v => `${v} kg` },
+          },
+          yFat: {
+            position: 'right',
+            min: 0, max: 50,
+            grid: { display: false },
+            ticks: { color: '#ffa42b', font: { size: 9 }, callback: v => `${v}%` },
+          },
+        },
+      },
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 //  PILL SETUP
 // ═══════════════════════════════════════════════════════════════════════════
 const RENDERS = {
@@ -862,6 +1050,7 @@ const RENDERS = {
   steps:    renderSteps,
   stress:   renderStress,
   activity: renderActivity,
+  bodycomp: renderBodyComp,
 };
 
 document.querySelectorAll('.time-pills').forEach(pillGroup => {
@@ -884,5 +1073,7 @@ renderSleep('today');
 renderSteps('today');
 renderStress('today');
 renderActivity('today');
+renderFitnessAge();
+renderBodyComp('today');
 
 })();

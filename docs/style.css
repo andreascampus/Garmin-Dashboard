@@ -888,6 +888,164 @@ body::after {
   flex-shrink: 0;
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   FITNESSALTER
+══════════════════════════════════════════════════════════════════════ */
+.fa-main {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.fa-value {
+  font-size: 64px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -3px;
+  font-variant-numeric: tabular-nums;
+}
+
+.fa-unit {
+  font-size: 18px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.fa-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.fa-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.fa-bar-wrap { margin-top: auto; }
+
+.fa-bar-track {
+  height: 5px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.fa-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  width: 0;
+  transition: width 1.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+.fa-bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.fa-empty {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  padding: 12px 0;
+}
+
+.fa-empty small { font-size: 10px; opacity: 0.7; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   KÖRPERDATEN (Index S2)
+══════════════════════════════════════════════════════════════════════ */
+.bc-top {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.bc-weight {
+  font-size: 54px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -3px;
+  font-variant-numeric: tabular-nums;
+}
+
+.bc-weight-unit {
+  font-size: 18px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.bc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.bc-metric {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+
+.bc-metric-val {
+  font-size: 22px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.bc-metric-lbl {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.bc-date {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.bc-legend-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.bc-leg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 9px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.bc-leg span {
+  width: 14px;
+  height: 2px;
+  border-radius: 1px;
+  display: inline-block;
+}
+
 /* ── Animations ────────────────────────────────────────────────────── */
 @keyframes cardReveal {
   0%   { opacity: 0;  transform: translateY(18px) scale(0.97); }
@@ -958,12 +1116,20 @@ body::after {
   }
 
   /* Karten-Reihenfolge auf Mobile */
-  .card-recovery  { order: 1; }
-  .card-sleep     { order: 2; }
-  .card-battery   { order: 3; }
-  .card-stress    { order: 4; }
-  .card-steps     { order: 5; }
-  .card-activity  { order: 6; }
+  .card-recovery    { order: 1; }
+  .card-sleep       { order: 2; }
+  .card-battery     { order: 3; }
+  .card-stress      { order: 4; }
+  .card-steps       { order: 5; }
+  .card-activity    { order: 6; }
+  .card-fitness-age { order: 7; }
+  .card-body-comp   { order: 8; }
+
+  /* Körperdaten auf Mobile: 2-spaltig */
+  .bc-grid { gap: 8px; }
+  .bc-metric-val { font-size: 18px; }
+  .bc-weight { font-size: 46px; }
+  .fa-value  { font-size: 54px; }
 
   /* Karten */
   .card {

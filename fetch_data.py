@@ -167,6 +167,58 @@ def fetch_vo2max(api, today_str):
     return raw.get("vo2Max") or raw.get("maxMetValue")
 
 
+def fetch_fitness_age(api, today_str):
+    """Fitnessalter aus get_stats() oder get_user_profile()."""
+    raw = safe(lambda: api.get_stats(today_str), "Fitnessalter/Stats")
+    if raw:
+        age = raw.get("fitnessAge") or raw.get("biologicalAge")
+        if age is not None:
+            return int(age)
+    profile = safe(lambda: api.get_user_profile(), "Fitnessalter/Profile")
+    if profile:
+        val = profile.get("fitnessAge") or profile.get("biologicalAge")
+        if val is not None:
+            return int(val)
+    return None
+
+
+def fetch_body_composition(api, start_str, end_str):
+    """
+    Garmin Index S2: Gewicht, Körperfett, Muskelmasse, Knochenmasse, Körperwasser, BMI.
+    Gibt Liste [{date, weight, bmi, bodyFat, skeletalMuscle, boneMass, bodyWater}] zurück.
+    """
+    raw = safe(lambda: api.get_body_composition(start_str, end_str), "Body Composition")
+    if not raw:
+        return []
+
+    if isinstance(raw, list):
+        items = raw
+    elif isinstance(raw, dict):
+        items = (raw.get("dateWeightList")
+                 or raw.get("bodyCompositionList")
+                 or [])
+    else:
+        return []
+
+    entries = []
+    for item in items:
+        d = (item.get("calendarDate") or item.get("date") or "")[:10]
+        if not d:
+            continue
+        entries.append({
+            "date":           d,
+            "weight":         item.get("weight"),          # kg
+            "bmi":            item.get("bmi"),
+            "bodyFat":        item.get("bodyFat"),          # %
+            "skeletalMuscle": item.get("skeletalMuscle"),  # %
+            "boneMass":       item.get("boneMass"),         # kg
+            "bodyWater":      item.get("bodyWater"),        # %
+        })
+
+    entries.sort(key=lambda x: x["date"], reverse=True)
+    return entries
+
+
 def fetch_training_readiness(api, today_str):
     raw = safe(lambda: api.get_training_readiness(today_str), "Training Readiness")
     if not raw:
@@ -313,12 +365,19 @@ def main():
     log.info("VO2max...")
     vo2max = fetch_vo2max(api, today_str)
 
+    log.info("Fitnessalter...")
+    fitness_age = fetch_fitness_age(api, today_str)
+
     log.info("Training Readiness...")
     training_readiness = fetch_training_readiness(api, today_str)
 
     # ── Range-Abfragen (effizient) ──────────────────────────────────────────
     log.info("Body Battery (30 Tage Range)...")
     bb_range = fetch_body_battery_range(api, start_30, today_str)
+
+    log.info("Körperdaten Index S2 (90 Tage)...")
+    start_90 = (today - timedelta(days=89)).isoformat()
+    body_composition = fetch_body_composition(api, start_90, today_str)
 
     log.info("Schritte (30 Tage Range)...")
     steps_range = fetch_daily_steps_range(api, start_30, today_str)
@@ -353,16 +412,19 @@ def main():
     # ── JSON zusammenstellen ────────────────────────────────────────────────
     data = {
         "updated_at":         datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
-        # Heutige Werte (Rückwärtskompatibilität)
+        # Heutige Werte
         "hrv":                hrv,
         "bodyBattery":        body_battery,
         "restingHeartRate":   rhr_today,
         "sleep":              sleep,
         "stress":             stress,
         "vo2max":             vo2max,
+        "fitnessAge":         fitness_age,
         "trainingReadiness":  training_readiness,
         "stepsToday":         steps_today,
         "lastActivity":       last_activity,
+        # Körperdaten (Index S2) — neuester Eintrag zuerst
+        "bodyComposition":    body_composition,
         # 30-Tage History
         "history": {
             "days":       history_days,
@@ -376,14 +438,21 @@ def main():
 
     log.info(f"✓ Gespeichert → {OUT_PATH}")
     # Kurze Zusammenfassung
+    latest_bc = body_composition[0] if body_composition else {}
     print(f"\n{'─'*50}")
     print(f"  Schlaf-Score:       {sleep.get('score')}")
     print(f"  HRV Status:         {hrv.get('status')}")
     print(f"  Ruhepuls:           {rhr_today} bpm")
     print(f"  Training Readiness: {training_readiness}")
+    print(f"  Fitnessalter:       {fitness_age}")
     print(f"  Schritte heute:     {steps_today}")
     print(f"  Aktivitäten:        {len(activities)}")
     print(f"  History Tage:       {len(history_days)}")
+    print(f"  Körperdaten:        {len(body_composition)} Einträge")
+    if latest_bc:
+        print(f"    → Gewicht: {latest_bc.get('weight')} kg  "
+              f"Körperfett: {latest_bc.get('bodyFat')}%  "
+              f"Muskeln: {latest_bc.get('skeletalMuscle')}%")
     print(f"{'─'*50}\n")
 
 
