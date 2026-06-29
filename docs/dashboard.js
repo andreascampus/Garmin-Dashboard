@@ -910,47 +910,48 @@ function renderBodyComp(range) {
     return;
   }
 
-  const w   = latest.weight;
-  const fat = latest.bodyFat;
-  const mus = latest.skeletalMuscle;
+  const w   = latest.weight;      // kg
+  const fat = latest.bodyFat;     // %
+  const mus = latest.muscleMass;  // kg (Index S2) oder null
   const bmi = latest.bmi;
-  const bon = latest.boneMass;
-  const wat = latest.bodyWater;
+  const bon = latest.boneMass;    // kg
+  const wat = latest.bodyWater;   // %
 
-  const wColor  = '#f2f3f4';
-  const fatColor = fat != null ? (fat < 18 ? '#539df5' : fat < 25 ? '#1ed760' : fat < 32 ? '#ffa42b' : '#f3727f') : 'var(--text-muted)';
-  const musColor = mus != null ? (mus >= 45 ? '#1ed760' : mus >= 35 ? '#ffa42b' : '#f3727f') : 'var(--text-muted)';
+  const fatColor = fat != null ? (fat < 15 ? '#539df5' : fat < 22 ? '#1ed760' : fat < 28 ? '#ffa42b' : '#f3727f') : 'var(--text-muted)';
+  const musLabel = mus != null ? 'MUSKELMASSE kg' : 'KNOCHENMASSE kg';
+  const musVal   = mus ?? bon;
+  const musColor = '#a78bfa';
 
   if (range === 'today') {
     el.innerHTML = `
       <div class="bc-top">
-        <span class="bc-weight" id="bc-w">${w != null ? '—' : '—'}</span>
+        <span class="bc-weight" id="bc-w">—</span>
         <span class="bc-weight-unit">kg</span>
       </div>
       <div class="bc-grid">
         <div class="bc-metric">
-          <div class="bc-metric-val" style="color:${fatColor}" id="bc-fat">${fat != null ? '—' : '—'}</div>
+          <div class="bc-metric-val" style="color:${fatColor}" id="bc-fat">—</div>
           <div class="bc-metric-lbl">KÖRPERFETT %</div>
         </div>
         <div class="bc-metric">
-          <div class="bc-metric-val" style="color:${musColor}" id="bc-mus">${mus != null ? '—' : '—'}</div>
-          <div class="bc-metric-lbl">MUSKELN %</div>
+          <div class="bc-metric-val" style="color:${musColor}" id="bc-mus">—</div>
+          <div class="bc-metric-lbl">${musLabel}</div>
         </div>
         <div class="bc-metric">
-          <div class="bc-metric-val" id="bc-bmi">${bmi != null ? '—' : '—'}</div>
+          <div class="bc-metric-val" id="bc-bmi">—</div>
           <div class="bc-metric-lbl">BMI</div>
         </div>
         <div class="bc-metric">
-          <div class="bc-metric-val" style="color:#539df5" id="bc-wat">${wat != null ? '—' : '—'}</div>
+          <div class="bc-metric-val" style="color:#539df5" id="bc-wat">—</div>
           <div class="bc-metric-lbl">KÖRPERWASSER %</div>
         </div>
       </div>
       <div class="bc-date">Letzte Messung: ${fmtDate(latest.date)}</div>`;
 
     // Animate numbers
-    if (w != null)   countUp($('bc-w'),   w,   900, v => v.toFixed(1));
+    if (w   != null) countUp($('bc-w'),   w,   900, v => v.toFixed(1));
     if (fat != null) countUp($('bc-fat'), fat, 800, v => v.toFixed(1) + '%');
-    if (mus != null) countUp($('bc-mus'), mus, 800, v => v.toFixed(1) + '%');
+    if (musVal != null) countUp($('bc-mus'), musVal, 800, v => v.toFixed(1));
     if (bmi != null) countUp($('bc-bmi'), bmi, 800, v => v.toFixed(1));
     if (wat != null) countUp($('bc-wat'), wat, 800, v => v.toFixed(1) + '%');
 

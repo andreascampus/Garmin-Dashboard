@@ -135,14 +135,27 @@ body::after {
 
 /* ── Grid (Basis, wird unten überschrieben) ────────────────────────── */
 
-/* ── Grid angepasst für 6 Karten ──────────────────────────────────── */
+/* ── Grid — explizites Layout per grid-template-areas ─────────────── */
 .grid {
   display: grid;
-  grid-template-columns: 290px 1fr 1fr;
-  grid-template-rows: auto auto auto;
+  grid-template-columns: 300px 1fr 1fr;
+  grid-template-rows: auto;
   gap: 10px;
+  grid-template-areas:
+    "recovery battery     sleep"
+    "recovery steps       stress"
+    "recovery activity    fitness-age"
+    "recovery bodycomp    bodycomp";
 }
-.card-recovery { grid-row: 1 / 3; }
+
+.card-recovery    { grid-area: recovery; }
+.card-battery     { grid-area: battery; }
+.card-sleep       { grid-area: sleep; }
+.card-steps       { grid-area: steps; }
+.card-stress      { grid-area: stress; }
+.card-activity    { grid-area: activity; }
+.card-fitness-age { grid-area: fitness-age; }
+.card-body-comp   { grid-area: bodycomp; }
 
 /* ── Cards ─────────────────────────────────────────────────────────── */
 .card {
@@ -288,6 +301,7 @@ body::after {
 ══════════════════════════════════════════════════════════════════════ */
 .card-recovery {
   align-items: center;
+  justify-content: flex-start;  /* Ring oben, Metriken gestapelt darunter */
 }
 
 /* Ring */
@@ -1071,11 +1085,12 @@ body::after {
 @media (max-width: 980px) {
   .grid {
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto;
-  }
-  .card-recovery {
-    grid-row: auto;
-    grid-column: 1 / -1;
+    grid-template-areas:
+      "recovery  recovery"
+      "battery   sleep"
+      "steps     stress"
+      "activity  fitness-age"
+      "bodycomp  bodycomp";
   }
 }
 
@@ -1112,6 +1127,7 @@ body::after {
   /* Grid: eine Spalte */
   .grid {
     grid-template-columns: 1fr;
+    grid-template-areas: none;
     gap: 8px;
   }
 

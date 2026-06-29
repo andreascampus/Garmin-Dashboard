@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-29T17:59:14Z",
+  "updated_at": "2026-06-29T20:16:54Z",
   "hrv": {
     "lastNight": null,
     "status": "LOW",
@@ -10,12 +10,12 @@
   "bodyBattery": {
     "current": null,
     "charged": 63,
-    "drained": 72,
+    "drained": 84,
     "history": [
       {
         "date": "2026-06-29",
         "charged": 63,
-        "drained": 72,
+        "drained": 84,
         "endValue": null
       },
       {
@@ -204,10 +204,11 @@
     "awakeSeconds": 1140
   },
   "stress": {
-    "avgStressLevel": 28,
+    "avgStressLevel": 34,
     "maxStressLevel": 93
   },
   "vo2max": null,
+  "fitnessAge": null,
   "trainingReadiness": 81,
   "stepsToday": null,
   "lastActivity": {
@@ -220,16 +221,468 @@
     "maxHr": 136.0,
     "calories": 214.0
   },
+  "bodyComposition": [
+    {
+      "date": "2026-06-29",
+      "weight": 78.75,
+      "bmi": 22.3,
+      "bodyFat": 17.0,
+      "muscleMass": null,
+      "boneMass": 5.59,
+      "bodyWater": 60.6
+    },
+    {
+      "date": "2026-06-25",
+      "weight": 78.19,
+      "bmi": 22.1,
+      "bodyFat": 18.1,
+      "muscleMass": null,
+      "boneMass": 5.43,
+      "bodyWater": 59.8
+    },
+    {
+      "date": "2026-06-24",
+      "weight": 77.97,
+      "bmi": 22.1,
+      "bodyFat": 17.4,
+      "muscleMass": null,
+      "boneMass": 5.48,
+      "bodyWater": 60.3
+    },
+    {
+      "date": "2026-06-22",
+      "weight": 78.86,
+      "bmi": 22.3,
+      "bodyFat": 17.4,
+      "muscleMass": null,
+      "boneMass": 5.56,
+      "bodyWater": 60.3
+    },
+    {
+      "date": "2026-06-21",
+      "weight": 79.55,
+      "bmi": 22.5,
+      "bodyFat": 17.1,
+      "muscleMass": null,
+      "boneMass": 5.66,
+      "bodyWater": 60.5
+    },
+    {
+      "date": "2026-06-19",
+      "weight": 78.01,
+      "bmi": 22.1,
+      "bodyFat": 17.3,
+      "muscleMass": null,
+      "boneMass": 5.49,
+      "bodyWater": 60.4
+    },
+    {
+      "date": "2026-06-18",
+      "weight": 77.92,
+      "bmi": 22.0,
+      "bodyFat": 18.0,
+      "muscleMass": null,
+      "boneMass": 5.41,
+      "bodyWater": 59.9
+    },
+    {
+      "date": "2026-06-17",
+      "weight": 79.01,
+      "bmi": 22.4,
+      "bodyFat": 17.8,
+      "muscleMass": null,
+      "boneMass": 5.53,
+      "bodyWater": 60.0
+    },
+    {
+      "date": "2026-06-15",
+      "weight": 79.42,
+      "bmi": 22.5,
+      "bodyFat": 17.3,
+      "muscleMass": null,
+      "boneMass": 5.62,
+      "bodyWater": 60.3
+    },
+    {
+      "date": "2026-06-14",
+      "weight": 78.48,
+      "bmi": 22.2,
+      "bodyFat": 17.5,
+      "muscleMass": null,
+      "boneMass": 5.51,
+      "bodyWater": 60.2
+    },
+    {
+      "date": "2026-06-13",
+      "weight": 78.58,
+      "bmi": 22.2,
+      "bodyFat": 17.3,
+      "muscleMass": null,
+      "boneMass": 5.55,
+      "bodyWater": 60.4
+    },
+    {
+      "date": "2026-06-11",
+      "weight": 78.44,
+      "bmi": 22.2,
+      "bodyFat": 18.0,
+      "muscleMass": null,
+      "boneMass": 5.47,
+      "bodyWater": 59.9
+    },
+    {
+      "date": "2026-06-08",
+      "weight": 78.46,
+      "bmi": 22.2,
+      "bodyFat": 17.6,
+      "muscleMass": null,
+      "boneMass": 5.51,
+      "bodyWater": 60.2
+    },
+    {
+      "date": "2026-06-07",
+      "weight": 78.58,
+      "bmi": 22.2,
+      "bodyFat": 17.7,
+      "muscleMass": null,
+      "boneMass": 5.5,
+      "bodyWater": 60.0
+    },
+    {
+      "date": "2026-06-06",
+      "weight": 78.91,
+      "bmi": 22.3,
+      "bodyFat": 16.7,
+      "muscleMass": null,
+      "boneMass": 5.63,
+      "bodyWater": 60.8
+    },
+    {
+      "date": "2026-06-05",
+      "weight": 78.71,
+      "bmi": 22.3,
+      "bodyFat": 17.3,
+      "muscleMass": null,
+      "boneMass": 5.55,
+      "bodyWater": 60.3
+    },
+    {
+      "date": "2026-06-01",
+      "weight": 79.54,
+      "bmi": 22.5,
+      "bodyFat": 17.4,
+      "muscleMass": null,
+      "boneMass": 5.63,
+      "bodyWater": 60.3
+    },
+    {
+      "date": "2026-05-30",
+      "weight": 78.09,
+      "bmi": 22.1,
+      "bodyFat": 17.7,
+      "muscleMass": null,
+      "boneMass": 5.46,
+      "bodyWater": 60.1
+    },
+    {
+      "date": "2026-05-28",
+      "weight": 79.71,
+      "bmi": 22.6,
+      "bodyFat": 17.9,
+      "muscleMass": null,
+      "boneMass": 5.6,
+      "bodyWater": 60.0
+    },
+    {
+      "date": "2026-05-26",
+      "weight": 80.11,
+      "bmi": 22.7,
+      "bodyFat": 18.1,
+      "muscleMass": null,
+      "boneMass": 5.61,
+      "bodyWater": 59.8
+    },
+    {
+      "date": "2026-05-25",
+      "weight": 79.59,
+      "bmi": 22.5,
+      "bodyFat": 17.8,
+      "muscleMass": null,
+      "boneMass": 5.59,
+      "bodyWater": 60.0
+    },
+    {
+      "date": "2026-05-24",
+      "weight": 80.32,
+      "bmi": 22.7,
+      "bodyFat": 17.9,
+      "muscleMass": null,
+      "boneMass": 5.66,
+      "bodyWater": 60.0
+    },
+    {
+      "date": "2026-05-21",
+      "weight": 79.39,
+      "bmi": 22.5,
+      "bodyFat": 18.9,
+      "muscleMass": null,
+      "boneMass": 5.47,
+      "bodyWater": 59.2
+    },
+    {
+      "date": "2026-05-20",
+      "weight": 79.38,
+      "bmi": 22.5,
+      "bodyFat": 18.3,
+      "muscleMass": null,
+      "boneMass": 5.53,
+      "bodyWater": 59.7
+    },
+    {
+      "date": "2026-05-18",
+      "weight": 79.99,
+      "bmi": 22.6,
+      "bodyFat": 18.6,
+      "muscleMass": null,
+      "boneMass": 5.56,
+      "bodyWater": 59.4
+    },
+    {
+      "date": "2026-05-16",
+      "weight": 79.46,
+      "bmi": 22.5,
+      "bodyFat": 18.1,
+      "muscleMass": null,
+      "boneMass": 5.55,
+      "bodyWater": 59.8
+    },
+    {
+      "date": "2026-05-15",
+      "weight": 79.81,
+      "bmi": 22.6,
+      "bodyFat": 18.7,
+      "muscleMass": null,
+      "boneMass": 5.53,
+      "bodyWater": 59.4
+    },
+    {
+      "date": "2026-05-14",
+      "weight": 78.65,
+      "bmi": 22.3,
+      "bodyFat": 18.5,
+      "muscleMass": null,
+      "boneMass": 5.44,
+      "bodyWater": 59.5
+    },
+    {
+      "date": "2026-05-13",
+      "weight": 79.75,
+      "bmi": 22.6,
+      "bodyFat": 18.6,
+      "muscleMass": null,
+      "boneMass": 5.53,
+      "bodyWater": 59.4
+    },
+    {
+      "date": "2026-05-11",
+      "weight": 79.83,
+      "bmi": 22.6,
+      "bodyFat": 18.3,
+      "muscleMass": null,
+      "boneMass": 5.57,
+      "bodyWater": 59.6
+    },
+    {
+      "date": "2026-05-10",
+      "weight": 80.84,
+      "bmi": 22.9,
+      "bodyFat": 17.8,
+      "muscleMass": null,
+      "boneMass": 5.72,
+      "bodyWater": 60.0
+    },
+    {
+      "date": "2026-05-07",
+      "weight": 79.55,
+      "bmi": 22.5,
+      "bodyFat": 18.5,
+      "muscleMass": null,
+      "boneMass": 5.53,
+      "bodyWater": 59.5
+    },
+    {
+      "date": "2026-05-03",
+      "weight": 80.72,
+      "bmi": 22.8,
+      "bodyFat": 18.4,
+      "muscleMass": null,
+      "boneMass": 5.64,
+      "bodyWater": 59.5
+    },
+    {
+      "date": "2026-05-02",
+      "weight": 80.67,
+      "bmi": 22.8,
+      "bodyFat": 18.4,
+      "muscleMass": null,
+      "boneMass": 5.64,
+      "bodyWater": 59.5
+    },
+    {
+      "date": "2026-05-01",
+      "weight": 79.36,
+      "bmi": 22.5,
+      "bodyFat": 18.6,
+      "muscleMass": null,
+      "boneMass": 5.49,
+      "bodyWater": 59.4
+    },
+    {
+      "date": "2026-04-27",
+      "weight": 81.88,
+      "bmi": 23.2,
+      "bodyFat": 18.4,
+      "muscleMass": null,
+      "boneMass": 5.76,
+      "bodyWater": 59.6
+    },
+    {
+      "date": "2026-04-26",
+      "weight": 80.23,
+      "bmi": 22.7,
+      "bodyFat": 18.2,
+      "muscleMass": null,
+      "boneMass": 5.62,
+      "bodyWater": 59.7
+    },
+    {
+      "date": "2026-04-25",
+      "weight": 80.45,
+      "bmi": 22.8,
+      "bodyFat": 18.3,
+      "muscleMass": null,
+      "boneMass": 5.63,
+      "bodyWater": 59.6
+    },
+    {
+      "date": "2026-04-21",
+      "weight": 80.24,
+      "bmi": 22.7,
+      "bodyFat": 18.0,
+      "muscleMass": null,
+      "boneMass": 5.64,
+      "bodyWater": 59.8
+    },
+    {
+      "date": "2026-04-20",
+      "weight": 80.96,
+      "bmi": 22.9,
+      "bodyFat": 18.6,
+      "muscleMass": null,
+      "boneMass": 5.65,
+      "bodyWater": 59.5
+    },
+    {
+      "date": "2026-04-19",
+      "weight": 80.84,
+      "bmi": 22.9,
+      "bodyFat": 18.5,
+      "muscleMass": null,
+      "boneMass": 5.65,
+      "bodyWater": 59.5
+    },
+    {
+      "date": "2026-04-18",
+      "weight": 80.64,
+      "bmi": 22.8,
+      "bodyFat": 18.8,
+      "muscleMass": null,
+      "boneMass": 5.6,
+      "bodyWater": 59.3
+    },
+    {
+      "date": "2026-04-16",
+      "weight": 81.28,
+      "bmi": 23.0,
+      "bodyFat": 19.0,
+      "muscleMass": null,
+      "boneMass": 5.65,
+      "bodyWater": 59.2
+    },
+    {
+      "date": "2026-04-14",
+      "weight": 80.61,
+      "bmi": 22.8,
+      "bodyFat": 19.3,
+      "muscleMass": null,
+      "boneMass": 5.55,
+      "bodyWater": 58.9
+    },
+    {
+      "date": "2026-04-12",
+      "weight": 80.44,
+      "bmi": 22.8,
+      "bodyFat": 18.3,
+      "muscleMass": null,
+      "boneMass": 5.63,
+      "bodyWater": 59.6
+    },
+    {
+      "date": "2026-04-11",
+      "weight": 79.98,
+      "bmi": 22.6,
+      "bodyFat": 0.0,
+      "muscleMass": null,
+      "boneMass": 0.0,
+      "bodyWater": 0.0
+    },
+    {
+      "date": "2026-04-09",
+      "weight": 80.33,
+      "bmi": 22.7,
+      "bodyFat": 18.5,
+      "muscleMass": null,
+      "boneMass": 5.6,
+      "bodyWater": 59.5
+    },
+    {
+      "date": "2026-04-07",
+      "weight": 80.26,
+      "bmi": 22.7,
+      "bodyFat": 0.0,
+      "muscleMass": null,
+      "boneMass": 0.0,
+      "bodyWater": 0.0
+    },
+    {
+      "date": "2026-04-04",
+      "weight": 79.96,
+      "bmi": 22.6,
+      "bodyFat": 18.8,
+      "muscleMass": null,
+      "boneMass": 5.53,
+      "bodyWater": 59.2
+    },
+    {
+      "date": "2026-04-02",
+      "weight": 80.28,
+      "bmi": 22.7,
+      "bodyFat": 18.2,
+      "muscleMass": null,
+      "boneMass": 5.62,
+      "bodyWater": 59.7
+    }
+  ],
   "history": {
     "days": [
       {
         "date": "2026-06-29",
         "bbCharged": 63,
-        "bbDrained": 72,
+        "bbDrained": 84,
         "steps": null,
         "sleepScore": 92,
         "sleepSeconds": 29760,
-        "avgStress": 28,
+        "avgStress": 34,
         "rhr": 41.0,
         "hrv": null
       },

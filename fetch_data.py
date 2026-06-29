@@ -205,14 +205,28 @@ def fetch_body_composition(api, start_str, end_str):
         d = (item.get("calendarDate") or item.get("date") or "")[:10]
         if not d:
             continue
+
+        # Garmin speichert Gewicht und Knochenmasse intern in Gramm → Umrechnung in kg
+        raw_weight   = item.get("weight")
+        raw_bonemass = item.get("boneMass")
+        weight_kg    = round(raw_weight   / 1000, 2) if raw_weight   is not None else None
+        bonemass_kg  = round(raw_bonemass / 1000, 2) if raw_bonemass is not None else None
+
+        # Muskelmasse: Index S2 liefert kein skeletalMuscle %, evtl. muscleMass in Gramm
+        raw_muscle = item.get("skeletalMuscle") or item.get("muscleMass")
+        muscle_val = None
+        if raw_muscle is not None:
+            # Wenn > 100 → wahrscheinlich Gramm → kg umrechnen
+            muscle_val = round(raw_muscle / 1000, 1) if raw_muscle > 100 else round(raw_muscle, 1)
+
         entries.append({
-            "date":           d,
-            "weight":         item.get("weight"),          # kg
-            "bmi":            item.get("bmi"),
-            "bodyFat":        item.get("bodyFat"),          # %
-            "skeletalMuscle": item.get("skeletalMuscle"),  # %
-            "boneMass":       item.get("boneMass"),         # kg
-            "bodyWater":      item.get("bodyWater"),        # %
+            "date":        d,
+            "weight":      weight_kg,          # kg
+            "bmi":         round(item.get("bmi"), 1) if item.get("bmi") else None,
+            "bodyFat":     item.get("bodyFat"),  # %
+            "muscleMass":  muscle_val,           # kg oder %
+            "boneMass":    bonemass_kg,           # kg
+            "bodyWater":   item.get("bodyWater"), # %
         })
 
     entries.sort(key=lambda x: x["date"], reverse=True)
