@@ -237,6 +237,43 @@ body::after {
   margin-bottom: 10px;
 }
 
+/* WHOOP-style chart header */
+.whoop-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.whoop-chart-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: var(--text);
+  text-transform: uppercase;
+}
+
+.whoop-chart-legend {
+  display: flex;
+  gap: 10px;
+}
+
+.wc-leg {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.wc-leg span {
+  width: 14px;
+  height: 2px;
+  border-radius: 1px;
+  display: inline-block;
+}
+
 /* ══════════════════════════════════════════════════════════════════════
    RECOVERY CARD
 ══════════════════════════════════════════════════════════════════════ */

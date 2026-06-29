@@ -212,103 +212,184 @@ function renderRecovery(range) {
     }, 100);
 
   } else {
-    const slice   = getSlice(range);
-    const n       = slice.length;
-    const reversed = [...slice].reverse();
+    // ── WHOOP-Style: Belastung & Erholung ─────────────────────────────
+    const slice    = getSlice(range);
+    const n        = slice.length;
+    const reversed = [...slice].reverse(); // oldest first
 
-    // Dünnere Labels bei 30T: nur jeden 4. Tag beschriften
-    const labelStep = n > 14 ? 4 : 2;
-    const labels  = reversed.map((d, i) => {
-      if (i % labelStep !== 0) return '';
+    // X-Labels: Wochentag + Tag (2-zeilig via Array)
+    const labelStep = n > 14 ? Math.ceil(n / 8) : 1;
+    const xLabels = reversed.map((d, i) => {
+      if (n > 14 && i % labelStep !== 0) return ['', ''];
       const dt = new Date(d.date + 'T12:00:00');
-      return dt.toLocaleDateString('de-DE', { day: 'numeric', month: 'numeric' });
+      return [
+        dt.toLocaleDateString('de-DE', { weekday: 'short' }),
+        dt.getDate().toString(),
+      ];
     });
 
-    const rhrVals = reversed.map(d => d.rhr ?? null);
-    const hrvVals = reversed.map(d => d.hrv ?? null);
-    const hasHRV  = hrvVals.some(v => v != null);
-
-    el.innerHTML = `
-      <div class="trend-chart-label">${hasHRV ? 'HRV (ms) & Ruhepuls (bpm)' : 'Ruhepuls (bpm)'}</div>
-      <div class="chart-wrap" style="height:200px;flex:none"><canvas id="recovery-chart"></canvas></div>`;
-
-    const datasets = [];
-    if (hasHRV) {
-      datasets.push({
-        label: 'HRV ms',
-        data: hrvVals,
-        borderColor: '#1ed760',
-        backgroundColor: 'rgba(30,215,96,0.08)',
-        borderWidth: 2,
-        pointRadius: n > 14 ? 2 : 3,
-        pointBackgroundColor: '#1ed760',
-        tension: 0.35,
-        fill: true,
-        spanGaps: true,
-        yAxisID: 'yHrv',
-      });
-    }
-    datasets.push({
-      label: 'RHR bpm',
-      data: rhrVals,
-      borderColor: '#f3727f',
-      backgroundColor: hasHRV ? 'transparent' : ctx => {
-        const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 160);
-        g.addColorStop(0, 'rgba(243,114,127,0.18)');
-        g.addColorStop(1, 'rgba(243,114,127,0.00)');
-        return g;
-      },
-      borderWidth: 2,
-      pointRadius: n > 14 ? 2 : 3,
-      pointBackgroundColor: '#f3727f',
-      tension: 0.35,
-      fill: !hasHRV,
-      spanGaps: true,
-      yAxisID: hasHRV ? 'yRhr' : 'y',
+    // Erholung (rechte Achse 0–100%) — Sleep Score als Proxy, wenn kein HRV
+    const recoveryVals = reversed.map(d => {
+      if (d.hrv != null && hrv.weeklyAvg) return clamp(Math.round(d.hrv / hrv.weeklyAvg * 100), 0, 100);
+      return d.sleepScore ?? null;
     });
 
-    // RHR-Bereich dynamisch berechnen
-    const rhrFiltered = rhrVals.filter(v => v != null);
-    const rhrMin = rhrFiltered.length ? Math.floor(Math.min(...rhrFiltered) / 5) * 5 - 5 : 30;
-    const rhrMax = rhrFiltered.length ? Math.ceil(Math.max(...rhrFiltered) / 5) * 5 + 5 : 80;
+    // Belastung (linke Achse 0–21) — Stress auf WHOOP-Strain-Skala mappen
+    const strainVals = reversed.map(d =>
+      d.avgStress != null ? +(d.avgStress / 100 * 21).toFixed(1) : null
+    );
 
-    const scales = {
-      x: {
-        grid: { display: false },
-        ticks: {
-          color: '#55585f',
-          font: { size: 9, family: 'Inter' },
-          maxRotation: 0,
-          autoSkip: false,
-        },
+    // Farbe je Recovery-Wert
+    const recovColor = v => v == null ? 'transparent' : v >= 67 ? '#1ed760' : v >= 34 ? '#ffa42b' : '#f3727f';
+
+    // Custom Plugin: Wert-Labels direkt am Punkt + Heute-Spalte
+    const whoop_plugin = {
+      id: 'whoopLabels',
+      afterDatasetsDraw(chart) {
+        const { ctx, chartArea, scales } = chart;
+        const lastIdx = chart.data.labels.length - 1;
+
+        // Heute-Spalte
+        const xScale = scales.x;
+        const todayX = xScale.getPixelForValue(lastIdx);
+        const colW   = xScale.width / (lastIdx + 1);
+        ctx.save();
+        ctx.fillStyle = 'rgba(255,255,255,0.04)';
+        ctx.fillRect(todayX - colW / 2, chartArea.top, colW, chartArea.height);
+        ctx.restore();
+
+        // Wert-Labels
+        chart.data.datasets.forEach((ds, di) => {
+          const meta = chart.getDatasetMeta(di);
+          meta.data.forEach((pt, pi) => {
+            const v = ds.data[pi];
+            if (v == null) return;
+
+            let color, text;
+            if (di === 0) {
+              // Erholung
+              color = recovColor(v);
+              text  = `${Math.round(v)}%`;
+            } else {
+              // Belastung
+              color = '#539df5';
+              text  = v.toFixed(1);
+            }
+
+            ctx.save();
+            ctx.font = `bold ${n > 14 ? 8 : 10}px Inter, sans-serif`;
+            ctx.fillStyle = color;
+            ctx.textAlign = 'center';
+            // Abwechselnd oben/unten um Überlappung zu vermeiden
+            const above = pi % 2 === 0;
+            ctx.fillText(text, pt.x, pt.y + (above ? -10 : 14));
+            ctx.restore();
+          });
+        });
       },
     };
-    if (hasHRV) {
-      scales.yHrv = { position: 'left',  grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#1ed760', font: { size: 9 }, stepSize: 10 } };
-      scales.yRhr = { position: 'right', grid: { display: false },                   ticks: { color: '#f3727f', font: { size: 9 }, stepSize: 5 }, min: rhrMin, max: rhrMax };
-    } else {
-      scales.y = {
-        min: rhrMin, max: rhrMax,
-        grid: { color: 'rgba(255,255,255,0.05)' },
-        ticks: { color: '#f3727f', font: { size: 9 }, stepSize: 5, callback: v => `${v}` },
-      };
-    }
+
+    el.innerHTML = `
+      <div class="whoop-chart-header">
+        <span class="whoop-chart-title">BELASTUNG &amp; ERHOLUNG</span>
+        <div class="whoop-chart-legend">
+          <span class="wc-leg"><span style="background:#539df5"></span>Belastung</span>
+          <span class="wc-leg"><span style="background:#888"></span>Erholung</span>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:220px;flex:none"><canvas id="recovery-chart"></canvas></div>`;
 
     charts['recovery'] = new Chart($('recovery-chart').getContext('2d'), {
       type: 'line',
-      data: { labels, datasets },
+      data: {
+        labels: xLabels,
+        datasets: [
+          {
+            label: 'Erholung %',
+            data: recoveryVals,
+            borderColor: 'rgba(180,180,180,0.7)',
+            borderWidth: 2,
+            tension: 0,
+            spanGaps: true,
+            pointRadius: n > 14 ? 4 : 6,
+            pointHoverRadius: 8,
+            pointBackgroundColor: recoveryVals.map(recovColor),
+            pointBorderColor: '#0f1011',
+            pointBorderWidth: 2,
+            yAxisID: 'yRecov',
+          },
+          {
+            label: 'Belastung',
+            data: strainVals,
+            borderColor: '#539df5',
+            borderWidth: 2,
+            tension: 0,
+            spanGaps: true,
+            pointRadius: n > 14 ? 4 : 6,
+            pointHoverRadius: 8,
+            pointBackgroundColor: '#539df5',
+            pointBorderColor: '#0f1011',
+            pointBorderWidth: 2,
+            yAxisID: 'yStrain',
+          },
+        ],
+      },
       options: {
-        ...CHART_DEFAULTS,
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 700, easing: 'easeOutQuart' },
+        layout: { padding: { top: 20, bottom: 4 } },
         plugins: {
-          ...CHART_DEFAULTS.plugins,
-          legend: {
-            display: hasHRV,
-            position: 'top', align: 'end',
-            labels: { color: '#55585f', font: { size: 9, family: 'Inter' }, boxWidth: 8, boxHeight: 8, padding: 8 },
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1c1c1e',
+            borderColor: 'rgba(255,255,255,0.10)',
+            borderWidth: 1,
+            titleColor: '#a8aaad',
+            bodyColor: '#f0f0f0',
+            padding: 10,
+            callbacks: {
+              label: ctx => ctx.datasetIndex === 0
+                ? ` Erholung: ${Math.round(ctx.raw)}%`
+                : ` Belastung: ${ctx.raw?.toFixed(1)}`,
+            },
+          },
+          whoopLabels: whoop_plugin,
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: {
+              color: '#55585f',
+              font: { size: 9, family: 'Inter' },
+              maxRotation: 0,
+              autoSkip: false,
+            },
+          },
+          yRecov: {
+            position: 'right',
+            min: 0, max: 100,
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            ticks: {
+              color: '#55585f',
+              font: { size: 9 },
+              stepSize: 33,
+              callback: v => v === 0 ? '0%' : v === 33 ? '33%' : v === 66 ? '66%' : v === 99 ? '100%' : null,
+            },
+          },
+          yStrain: {
+            position: 'left',
+            min: 0, max: 21,
+            grid: { display: false },
+            ticks: {
+              color: '#55585f',
+              font: { size: 9 },
+              stepSize: 7,
+            },
           },
         },
-        scales,
       },
+      plugins: [whoop_plugin],
     });
   }
 }
