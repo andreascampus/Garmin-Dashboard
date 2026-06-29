@@ -94,14 +94,14 @@
   }
 
   if (recoveryPct >= 67) {
-    statusText = 'OPTIMAL';   statusColor = 'var(--green)';
-    ringColor = 'var(--green)'; ringGlow = 'var(--green-glow)';
+    statusText = 'OPTIMAL';  statusColor = '#1ed760';
+    ringColor = '#1ed760';   ringGlow = 'rgba(30,215,96,0.35)';
   } else if (recoveryPct >= 34) {
-    statusText = 'MODERAT';   statusColor = 'var(--yellow)';
-    ringColor = 'var(--yellow)'; ringGlow = 'var(--yellow-glow)';
+    statusText = 'MODERAT';  statusColor = '#ffa42b';
+    ringColor = '#ffa42b';   ringGlow = 'rgba(255,164,43,0.35)';
   } else if (recoveryPct > 0) {
-    statusText = 'NIEDRIG';   statusColor = 'var(--red)';
-    ringColor = 'var(--red)'; ringGlow = 'var(--red-glow)';
+    statusText = 'NIEDRIG';  statusColor = '#f3727f';
+    ringColor = '#f3727f';   ringGlow = 'rgba(243,114,127,0.35)';
   }
 
   $('ring-pct').textContent     = recoveryPct ? `${recoveryPct}%` : '—';
@@ -129,9 +129,9 @@
 
   bbEl.textContent = bbCurrent ?? '—';
   if (bbCurrent != null) {
-    if (bbCurrent >= 70)      { bbEl.style.color = 'var(--green)'; }
-    else if (bbCurrent >= 40) { bbEl.style.color = 'var(--yellow)'; }
-    else                      { bbEl.style.color = 'var(--red)'; }
+    if (bbCurrent >= 70)      { bbEl.style.color = '#1ed760'; }
+    else if (bbCurrent >= 40) { bbEl.style.color = '#ffa42b'; }
+    else                      { bbEl.style.color = '#f3727f'; }
   }
 
   // Trend (Vergleich heute ↔ gestern)
@@ -156,16 +156,16 @@
       labels: bbLabels,
       datasets: [{
         data: bbVals,
-        borderColor: '#00d68f',
+        borderColor: '#1ed760',
         backgroundColor: ctx => {
           const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 120);
-          g.addColorStop(0, 'rgba(0,214,143,0.18)');
-          g.addColorStop(1, 'rgba(0,214,143,0.00)');
+          g.addColorStop(0, 'rgba(30,215,96,0.18)');
+          g.addColorStop(1, 'rgba(30,215,96,0.00)');
           return g;
         },
         borderWidth: 2,
         pointRadius: 4,
-        pointBackgroundColor: '#00d68f',
+        pointBackgroundColor: '#1ed760',
         pointBorderColor: '#111',
         pointBorderWidth: 2,
         fill: true,
@@ -252,12 +252,12 @@
   $('stress-val').textContent = avgStress ?? '—';
 
   let stressLabel = '—';
-  let stressColor = 'var(--text)';
+  let stressColor = '#f7f8f8';
   if (avgStress != null) {
-    if      (avgStress < 26) { stressLabel = 'RUHIG';   stressColor = 'var(--green)'; }
-    else if (avgStress < 51) { stressLabel = 'NIEDRIG'; stressColor = 'var(--yellow)'; }
-    else if (avgStress < 76) { stressLabel = 'MODERAT'; stressColor = 'var(--yellow)'; }
-    else                     { stressLabel = 'HOCH';    stressColor = 'var(--red)'; }
+    if      (avgStress < 26) { stressLabel = 'RUHIG';   stressColor = '#1ed760'; }
+    else if (avgStress < 51) { stressLabel = 'NIEDRIG'; stressColor = '#ffa42b'; }
+    else if (avgStress < 76) { stressLabel = 'MODERAT'; stressColor = '#ffa42b'; }
+    else                     { stressLabel = 'HOCH';    stressColor = '#f3727f'; }
   }
   $('stress-label').textContent       = stressLabel;
   $('stress-val').style.color         = stressColor;
