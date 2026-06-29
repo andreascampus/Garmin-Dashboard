@@ -35,14 +35,11 @@ jobs:
         run: pip install "garminconnect>=0.2.13"
 
       # 4 — Garmin-Daten abrufen
-      #      Credentials kommen aus GitHub Secrets (niemals im Code!)
-      #      Secrets anlegen: Settings → Secrets → Actions → New repository secret
-      #        GARMIN_EMAIL    = andreas.possert@hotmail.com
-      #        GARMIN_PASSWORD = <dein Passwort>
+      #      Secret anlegen: Settings → Secrets → Actions → New repository secret
+      #        GARMIN_TOKENS = Token-String vom ersten lokalen "python fetch_data.py" Lauf
       - name: Garmin-Daten abrufen
         env:
-          GARMIN_EMAIL:    ${{ secrets.GARMIN_EMAIL }}
-          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+          GARMIN_TOKENS: ${{ secrets.GARMIN_TOKENS }}
         run: python fetch_data.py
 
       # 5 — Aktualisierte garmin.json committen & pushen

@@ -4,19 +4,17 @@ fetch_data.py — Garmin Connect Datenabruf
 Ruft alle relevanten Gesundheitsdaten von Garmin Connect ab
 und speichert sie als docs/data/garmin.json.
 
-Verwendung (lokal):
+── Erster lokaler Lauf (einmalig) ──────────────────────────────
     pip install "garminconnect>=0.2.13"
     python fetch_data.py
+    → MFA-Code eingeben wenn Garmin ihn verlangt
+    → Am Ende wird GARMIN_TOKENS ausgegeben → als GitHub Secret speichern
 
-Credentials werden aus Umgebungsvariablen gelesen:
-    GARMIN_EMAIL, GARMIN_PASSWORD
-
-Falls nicht gesetzt → interaktive Eingabe (für lokale Tests).
-
-HINWEIS MFA: Garmin verlangt manchmal einen 2FA-Code.
-    Beim ersten lokalen Lauf kann ein MFA-Prompt erscheinen.
-    In GitHub Actions wird der gespeicherte Session-Token
-    (garmin_session/) wiederverwendet → kein MFA nötig.
+── GitHub Actions (danach automatisch) ─────────────────────────
+    Secrets nötig:
+        GARMIN_TOKENS   ← Token-String vom ersten lokalen Lauf
+    Optional (nicht mehr zwingend nötig):
+        GARMIN_EMAIL / GARMIN_PASSWORD
 """
 
 import json
@@ -54,8 +52,8 @@ def get_credentials():
 
 
 def get_mfa():
-    """Callback für MFA/2FA – wird nur aufgerufen wenn Garmin es verlangt."""
-    return input("Garmin MFA-Code (aus Authenticator-App): ").strip()
+    """Callback für MFA/2FA – wird nur bei interaktivem Login aufgerufen."""
+    return input("Garmin MFA-Code (aus E-Mail/Authenticator): ").strip()
 
 
 def safe_call(fn, label="", default=None, retries=2):
@@ -82,43 +80,73 @@ def fmt_duration(seconds):
 
 
 # ── Garmin-Login ────────────────────────────────────────────────────────────
-def login(email, password):
+def login():
     try:
         from garminconnect import (
             Garmin,
             GarminConnectAuthenticationError,
             GarminConnectConnectionError,
-            GarminConnectTooManyRequestsError,
         )
     except ImportError:
         log.error("garminconnect nicht installiert. Bitte: pip install 'garminconnect>=0.2.13'")
         sys.exit(1)
 
-    log.info("Verbinde mit Garmin Connect...")
-    api = Garmin(email=email, password=password, prompt_mfa=get_mfa)
-
-    # Session-Token wiederverwenden falls vorhanden (vermeidet MFA in CI)
-    try:
-        api.login(str(SESSION_DIR))
-        log.info("Session-Token geladen — kein neuer Login nötig.")
-    except Exception:
-        log.info("Kein gültiger Session-Token — normaler Login...")
+    # ── Weg 1: Token aus Umgebungsvariable (GitHub Actions) ──────────────────
+    token_str = os.environ.get("GARMIN_TOKENS", "").strip()
+    if token_str:
+        log.info("GARMIN_TOKENS gefunden — Login via gespeichertem Token...")
         try:
-            api.login()
-        except GarminConnectAuthenticationError as exc:
-            log.error(f"Authentifizierung fehlgeschlagen: {exc}")
-            sys.exit(1)
-        except GarminConnectConnectionError as exc:
-            log.error(f"Verbindungsfehler: {exc}")
-            sys.exit(1)
-
-        # Token für zukünftige Läufe speichern
-        try:
-            SESSION_DIR.mkdir(exist_ok=True)
-            api.garth.dump(str(SESSION_DIR))
-            log.info(f"Session-Token gespeichert: {SESSION_DIR}/")
+            api = Garmin(email="", password="")
+            api.garth.loads(token_str)
+            log.info("Token geladen — kein MFA nötig.")
+            return api
         except Exception as exc:
-            log.warning(f"Session speichern fehlgeschlagen: {exc!r}")
+            log.warning(f"Token ungültig: {exc!r} — falle auf normalen Login zurück...")
+
+    # ── Weg 2: Lokaler Token-Cache (nach erstem lokalem Login) ───────────────
+    if SESSION_DIR.exists():
+        log.info("Lokaler Session-Cache gefunden — versuche Wiederverwendung...")
+        try:
+            api = Garmin(email="", password="")
+            api.garth.load(str(SESSION_DIR))
+            log.info("Session-Cache geladen — kein MFA nötig.")
+            return api
+        except Exception as exc:
+            log.warning(f"Session-Cache abgelaufen: {exc!r} — neuer Login...")
+
+    # ── Weg 3: Interaktiver Login mit MFA (erster lokaler Lauf) ─────────────
+    email, password = get_credentials()
+    log.info("Interaktiver Login (MFA-Code wird ggf. abgefragt)...")
+    api = Garmin(email=email, password=password, prompt_mfa=get_mfa)
+    try:
+        api.login()
+    except GarminConnectAuthenticationError as exc:
+        log.error(f"Authentifizierung fehlgeschlagen: {exc}")
+        sys.exit(1)
+    except GarminConnectConnectionError as exc:
+        log.error(f"Verbindungsfehler: {exc}")
+        sys.exit(1)
+
+    # Token lokal speichern (für nächste lokale Läufe)
+    try:
+        SESSION_DIR.mkdir(exist_ok=True)
+        api.garth.dump(str(SESSION_DIR))
+        log.info(f"Session lokal gespeichert: {SESSION_DIR}/")
+    except Exception as exc:
+        log.warning(f"Session-Cache speichern fehlgeschlagen: {exc!r}")
+
+    # Token-String ausgeben → als GitHub Secret GARMIN_TOKENS speichern
+    try:
+        token_export = api.garth.dumps()
+        print("\n" + "=" * 65)
+        print("✓ LOGIN ERFOLGREICH — Token für GitHub Secret:")
+        print("-" * 65)
+        print("Secret-Name:  GARMIN_TOKENS")
+        print("Secret-Value:")
+        print(token_export)
+        print("=" * 65 + "\n")
+    except Exception as exc:
+        log.warning(f"Token-Export fehlgeschlagen: {exc!r}")
 
     return api
 
@@ -254,8 +282,7 @@ def fetch_last_activity(api):
 
 # ── Hauptprogramm ───────────────────────────────────────────────────────────
 def main():
-    email, password = get_credentials()
-    api = login(email, password)
+    api = login()
 
     today = date.today()
     today_str = today.isoformat()
