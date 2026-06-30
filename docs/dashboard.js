@@ -91,6 +91,16 @@ try {
   return;
 }
 
+// ── User-Konfiguration laden (Größe, Alter, Geschlecht für Berechnungen) ────
+let userCfg = { height_cm: 180, birth_year: 1990, gender: 'male', step_goal: 10000, activity_level: 'moderate' };
+try {
+  const cfgRes = await fetch(`${BASE}/data/user_config.json?t=${Date.now()}`);
+  if (cfgRes.ok) {
+    const raw = await cfgRes.json();
+    userCfg = { ...userCfg, ...raw };
+  }
+} catch (e) { /* Defaults verwenden */ }
+
 // ── Datum + Timestamp ────────────────────────────────────────────────────────
 const today = new Date();
 const dateEl = $('header-date');
@@ -252,7 +262,23 @@ function renderRecovery(range) {
       <div class="rhr-bar">
         <span class="rhr-label">RHR</span>
         <span class="rhr-value">${rhr ? rhr + ' bpm' : '— bpm'}</span>
-      </div>`;
+      </div>
+      ${(() => {
+        // HRV-Trend: Wöch.Ø vs. 30T-Baseline
+        const hvs = historyDays.slice(0,30).map(d=>d.hrv).filter(v=>v!=null);
+        const wk7  = historyDays.slice(0,7).map(d=>d.hrv).filter(v=>v!=null);
+        if (!hvs.length && weekAvg) {
+          // Nur weeklyAvg verfügbar — zeige Wöchentlich vs. keine Basis
+          return `<div class="rhr-bar" style="margin-top:6px"><span class="rhr-label">HRV ø 7T</span><span class="rhr-value">${weekAvg} ms</span></div>`;
+        }
+        const avg7 = wk7.length ? Math.round(wk7.reduce((a,b)=>a+b,0)/wk7.length) : weekAvg;
+        const avg30 = hvs.length ? Math.round(hvs.reduce((a,b)=>a+b,0)/hvs.length) : null;
+        if (!avg7) return '';
+        const trendPct = avg30 ? Math.round((avg7/avg30-1)*100) : null;
+        const trendStr = trendPct == null ? '' : (trendPct>0?`↑ +${trendPct}%`:`↓ ${trendPct}%`);
+        const trendCol = trendPct == null ? 'var(--text-muted)' : trendPct>=0 ? 'var(--green)' : 'var(--red)';
+        return `<div class="rhr-bar" style="margin-top:6px"><span class="rhr-label">HRV TREND</span><span class="rhr-value" style="color:${trendCol}">${trendStr || `${avg7} ms`}</span></div>`;
+      })()}`;
 
     // Animiere Ring + Zahl nach Render
     setTimeout(() => {
@@ -557,6 +583,18 @@ function renderSleep(range) {
     };
     const total = Object.values(phases).reduce((a, b) => a + b, 0);
 
+    // Schlafeffizienz: Schlafzeit / Gesamtbettzeit × 100
+    const inBedSec    = (sleep.totalSeconds || 0) + (sleep.awakeSeconds || 0);
+    const efficiency  = inBedSec > 0 ? Math.round((sleep.totalSeconds || 0) / inBedSec * 100) : null;
+    const effColor    = efficiency == null ? 'var(--text-muted)' : efficiency >= 85 ? 'var(--green)' : efficiency >= 75 ? 'var(--yellow)' : 'var(--red)';
+
+    // Schlafschulden: 7-Tage kumulativ (Ziel: 8h)
+    const TARGET_SLEEP = 8 * 3600;
+    const last7sleep   = historyDays.slice(0, 7);
+    const debtSec      = last7sleep.reduce((acc, d) => acc + (d.sleepSeconds != null ? Math.max(0, TARGET_SLEEP - d.sleepSeconds) : 0), 0);
+    const debtStr      = debtSec > 0 ? fmtHM(debtSec) : '0m';
+    const debtColor    = debtSec === 0 ? 'var(--green)' : debtSec < 7200 ? 'var(--yellow)' : 'var(--red)';
+
     el.innerHTML = `
       <div class="sleep-top">
         <span class="sleep-score">${sleep.score ?? '—'}</span>
@@ -573,6 +611,16 @@ function renderSleep(range) {
         <div class="leg"><span class="dot rem"></span>REM <b>${fmtHM(sleep.remSeconds)}</b></div>
         <div class="leg"><span class="dot light"></span>Leicht <b>${fmtHM(sleep.lightSeconds)}</b></div>
         <div class="leg"><span class="dot awake"></span>Wach <b>${fmtHM(sleep.awakeSeconds)}</b></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <div style="flex:1;background:var(--surface-1);border:1px solid var(--border-subtle);border-radius:8px;padding:8px 10px">
+          <div style="font-size:16px;font-weight:800;color:${effColor}">${efficiency != null ? efficiency + '%' : '—'}</div>
+          <div style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase;margin-top:3px">EFFIZIENZ</div>
+        </div>
+        <div style="flex:1;background:var(--surface-1);border:1px solid var(--border-subtle);border-radius:8px;padding:8px 10px">
+          <div style="font-size:16px;font-weight:800;color:${debtColor}">${debtStr}</div>
+          <div style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase;margin-top:3px">SCHULDEN 7T</div>
+        </div>
       </div>`;
 
     // Animate sleep score
@@ -656,7 +704,7 @@ function renderSleep(range) {
 function renderSteps(range) {
   destroyChart('steps');
   const el = $('steps-body');
-  const GOAL = 10000;
+  const GOAL = userCfg.step_goal || 10000;
 
   const stepsToday = data.stepsToday ?? historyDays[0]?.steps ?? null;
 
@@ -665,6 +713,12 @@ function renderSteps(range) {
     const color = stepsToday != null
       ? (stepsToday >= GOAL ? '#1ed760' : stepsToday >= 7000 ? '#ffa42b' : '#f3727f')
       : 'var(--text-muted)';
+
+    // Schrittziel-Rate: % Tage mit ≥ GOAL Schritten (30 Tage)
+    const daysWithSteps = historyDays.slice(0, 30).filter(d => d.steps != null);
+    const daysAtGoal    = daysWithSteps.filter(d => d.steps >= GOAL);
+    const goalRate      = daysWithSteps.length > 0 ? Math.round(daysAtGoal.length / daysWithSteps.length * 100) : null;
+    const rateColor     = goalRate == null ? 'var(--text-muted)' : goalRate >= 70 ? 'var(--green)' : goalRate >= 40 ? 'var(--yellow)' : 'var(--red)';
 
     el.innerHTML = `
       <div class="steps-top">
@@ -677,7 +731,12 @@ function renderSteps(range) {
       </div>
       <div class="steps-track">
         <div class="steps-fill" id="steps-fill" style="background:${color}"></div>
-      </div>`;
+      </div>
+      ${goalRate != null ? `
+      <div style="margin-top:10px;background:var(--surface-1);border:1px solid var(--border-subtle);border-radius:8px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase">ZIEL-RATE 30T</span>
+        <span style="font-size:18px;font-weight:800;color:${rateColor}">${goalRate}%</span>
+      </div>` : ''}`;
 
     // Animate step count
     const stepsNumEl = el.querySelector('.steps-value');
@@ -952,6 +1011,10 @@ function renderBodyComp(range) {
   const musVal   = mus ?? bon;
   const musColor = '#a78bfa';
 
+  // Fettmasse in kg berechnen
+  const fatKg   = (w != null && fat != null) ? +(w * fat / 100).toFixed(1) : null;
+  const fatKgColor = fatColor;
+
   if (range === 'today') {
     el.innerHTML = `
       <div class="bc-top">
@@ -962,6 +1025,10 @@ function renderBodyComp(range) {
         <div class="bc-metric">
           <div class="bc-metric-val" style="color:${fatColor}" id="bc-fat">—</div>
           <div class="bc-metric-lbl">KÖRPERFETT %</div>
+        </div>
+        <div class="bc-metric">
+          <div class="bc-metric-val" style="color:${fatKgColor}" id="bc-fatkg">—</div>
+          <div class="bc-metric-lbl">FETTMASSE kg</div>
         </div>
         <div class="bc-metric">
           <div class="bc-metric-val" style="color:${musColor}" id="bc-mus">—</div>
@@ -975,15 +1042,22 @@ function renderBodyComp(range) {
           <div class="bc-metric-val" style="color:#539df5" id="bc-wat">—</div>
           <div class="bc-metric-lbl">KÖRPERWASSER %</div>
         </div>
+        <div class="bc-metric">
+          <div class="bc-metric-val" style="color:#539df5" id="bc-h2o-lbl">
+            ${w != null && wat != null ? (+((w*(wat/100))).toFixed(1))+'kg' : '—'}
+          </div>
+          <div class="bc-metric-lbl">KÖRPERWASSER kg</div>
+        </div>
       </div>
       <div class="bc-date">Letzte Messung: ${fmtDate(latest.date)}</div>`;
 
     // Animate numbers
-    if (w   != null) countUp($('bc-w'),   w,   900, v => v.toFixed(1));
-    if (fat != null) countUp($('bc-fat'), fat, 800, v => v.toFixed(1) + '%');
+    if (w   != null) countUp($('bc-w'),     w,   900, v => v.toFixed(1));
+    if (fat != null) countUp($('bc-fat'),   fat, 800, v => v.toFixed(1) + '%');
+    if (fatKg != null) countUp($('bc-fatkg'), fatKg, 800, v => v.toFixed(1));
     if (musVal != null) countUp($('bc-mus'), musVal, 800, v => v.toFixed(1));
-    if (bmi != null) countUp($('bc-bmi'), bmi, 800, v => v.toFixed(1));
-    if (wat != null) countUp($('bc-wat'), wat, 800, v => v.toFixed(1) + '%');
+    if (bmi != null) countUp($('bc-bmi'),   bmi, 800, v => v.toFixed(1));
+    if (wat != null) countUp($('bc-wat'),   wat, 800, v => v.toFixed(1) + '%');
 
   } else {
     // Verlauf: Gewicht + Körperfett als Linienchart
@@ -1072,16 +1146,343 @@ function renderBodyComp(range) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+//  SPO2 CARD
+// ═══════════════════════════════════════════════════════════════════════════
+function renderSpO2(range) {
+  destroyChart('spo2');
+  const el = $('spo2-body');
+  const spo2Data = data.spo2 || {};
+  const todayVal = spo2Data.today;
+  const history  = spo2Data.history || [];
+
+  const getStatus = v => {
+    if (v == null) return { label: '—', cls: '', color: 'var(--text-muted)' };
+    if (v >= 95) return { label: 'NORMAL', cls: 'optimal', color: 'var(--green)' };
+    if (v >= 90) return { label: 'LEICHT NIEDRIG', cls: 'moderate', color: 'var(--yellow)' };
+    return { label: 'NIEDRIG', cls: 'low', color: 'var(--red)' };
+  };
+
+  if (range === 'today') {
+    const st = getStatus(todayVal);
+    el.innerHTML = `
+      <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:4px">
+        <span class="spo2-big" style="color:${st.color}" id="spo2-num">${todayVal != null ? '—' : '—'}</span>
+        <span class="spo2-unit">%</span>
+      </div>
+      ${todayVal != null ? `<span class="spo2-status ${st.cls}">${st.label}</span>` : '<span class="spo2-info">Keine SpO2-Daten.<br>Gerät muss SpO2-Messung unterstützen (Fenix 7, FR255 etc.)</span>'}
+      <div class="spo2-dots">
+        ${[...history].reverse().map(h => {
+          const s = getStatus(h.value);
+          const barH = h.value != null ? Math.max(4, Math.round((h.value - 88) / 12 * 100)) : 4;
+          const dt = new Date(h.date + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'short' });
+          return `<div class="spo2-dot-wrap">
+            <div class="spo2-bar" style="height:${barH}%;background:${s.color};opacity:${h.value?'1':'0.25'}"></div>
+            <div class="spo2-dot-lbl">${dt}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="spo2-info">Norm: 95–100%. Unter 90% Arztbesuch empfohlen.</div>`;
+
+    if (todayVal != null) {
+      const numEl = document.getElementById('spo2-num');
+      if (numEl) countUp(numEl, todayVal, 900, v => Math.round(v).toString());
+    }
+
+  } else {
+    // 7T Verlaufs-Balkendiagramm
+    const labels = [...history].reverse().map(h =>
+      new Date(h.date + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric' }));
+    const vals = [...history].reverse().map(h => h.value ?? null);
+    const avg  = vals.filter(Boolean).length ? +(vals.filter(Boolean).reduce((a,b)=>a+b,0)/vals.filter(Boolean).length).toFixed(1) : null;
+
+    el.innerHTML = `
+      <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:4px">
+        <span class="spo2-big" style="color:var(--green)">${avg != null ? avg : '—'}</span>
+        <span class="spo2-unit">% ø</span>
+      </div>
+      <div class="chart-wrap" style="flex:1"><canvas id="spo2-chart"></canvas></div>`;
+
+    charts['spo2'] = new Chart($('spo2-chart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'SpO2 %',
+          data: vals,
+          backgroundColor: vals.map(v => v == null ? 'transparent' : v >= 95 ? 'rgba(30,215,96,0.65)' : v >= 90 ? 'rgba(255,164,43,0.65)' : 'rgba(243,114,127,0.65)'),
+          borderRadius: 4, borderSkipped: false,
+        }],
+      },
+      options: {
+        ...CHART_DEFAULTS,
+        scales: {
+          x: xScaleOpts(),
+          y: { min: 88, max: 100, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#55585f', font: { size: 9 }, callback: v => `${v}%` } },
+        },
+      },
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  RUHEPULS CARD
+// ═══════════════════════════════════════════════════════════════════════════
+function renderRestingHR(range) {
+  destroyChart('restinghr');
+  const el = $('restinghr-body');
+  const rhrToday = data.restingHeartRate;
+
+  const slice    = historyDays.slice(0, range === '7d' ? 7 : 30);
+  const reversed = [...slice].reverse();
+  const labels   = dayLabels(slice);
+  const vals     = reversed.map(d => d.rhr ?? null);
+  const valsFilt = vals.filter(v => v != null);
+
+  const avg  = valsFilt.length ? Math.round(valsFilt.reduce((a,b)=>a+b,0)/valsFilt.length) : null;
+  const mn   = valsFilt.length ? Math.min(...valsFilt) : null;
+  const mx   = valsFilt.length ? Math.max(...valsFilt) : null;
+
+  // Trend: Vergleich erste vs. letzte Hälfte
+  const half = Math.floor(valsFilt.length/2);
+  const firstHalf = valsFilt.slice(0, half);
+  const lastHalf  = valsFilt.slice(half);
+  const avgFirst  = firstHalf.length ? firstHalf.reduce((a,b)=>a+b,0)/firstHalf.length : null;
+  const avgLast   = lastHalf.length  ? lastHalf.reduce((a,b)=>a+b,0)/lastHalf.length   : null;
+  const trend     = (avgFirst && avgLast) ? Math.round(avgLast - avgFirst) : null;
+  const trendStr  = trend == null ? '' : trend > 0 ? `↑ +${trend} bpm` : trend < 0 ? `↓ ${trend} bpm` : '→ stabil';
+  const trendCls  = trend == null ? 'flat' : trend > 0 ? 'up' : 'down';
+
+  el.innerHTML = `
+    <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:2px">
+      <span class="rhr-big" id="rhr-num">${rhrToday ?? '—'}</span>
+      <span class="rhr-unit">bpm</span>
+    </div>
+    <div class="rhr-sub">RUHEPULS HEUTE</div>
+    ${trend != null ? `<div class="rhr-trend ${trendCls}">${trendStr} (${range === '7d' ? '7T' : '30T'})</div>` : ''}
+    <div class="chart-wrap" style="flex:1;margin-top:10px"><canvas id="restinghr-chart"></canvas></div>
+    ${mn != null ? `<div style="display:flex;justify-content:space-between;margin-top:8px;font-size:9px;color:var(--text-muted)"><span>MIN ${mn} bpm</span><span>ø ${avg} bpm</span><span>MAX ${mx} bpm</span></div>` : ''}`;
+
+  if (rhrToday != null) {
+    const numEl = document.getElementById('rhr-num');
+    if (numEl) countUp(numEl, rhrToday, 800);
+  }
+
+  const yMin = mn != null ? Math.max(30, mn - 5) : 40;
+  const yMax = mx != null ? Math.min(100, mx + 5) : 80;
+
+  charts['restinghr'] = new Chart($('restinghr-chart').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'RHR bpm',
+        data: vals,
+        borderColor: '#f3727f',
+        backgroundColor: 'rgba(243,114,127,0.08)',
+        fill: true,
+        borderWidth: 2,
+        pointRadius: vals.map(v => v != null ? 3 : 0),
+        pointBackgroundColor: '#f3727f',
+        tension: 0.35,
+        spanGaps: true,
+      }],
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      scales: {
+        x: xScaleOpts(),
+        y: { min: yMin, max: yMax, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#55585f', font: { size: 9 }, callback: v => `${v}` } },
+      },
+    },
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  KALORIEN CARD
+// ═══════════════════════════════════════════════════════════════════════════
+function renderCalories(range) {
+  destroyChart('calories');
+  const el = $('calories-body');
+
+  // Heutige Werte: aus dem neuesten history-Eintrag
+  const todayDay    = historyDays[0] || {};
+  const activeCal   = todayDay.activeCalories ?? null;
+  const bmrCal      = todayDay.bmrCalories    ?? null;
+  const totalCal    = activeCal != null && bmrCal != null ? activeCal + bmrCal : null;
+  const fillPct     = totalCal && activeCal ? Math.round(activeCal / totalCal * 100) : 0;
+
+  if (range === 'today') {
+    const noData = activeCal == null && bmrCal == null;
+    if (noData) {
+      el.innerHTML = `<div class="fa-empty" style="padding:16px 0">Keine Kaloriendata.<br><small>Wird ab dem nächsten python3 fetch_data.py Lauf verfügbar.</small></div>`;
+      return;
+    }
+    el.innerHTML = `
+      <div class="cal-row">
+        <div class="cal-metric">
+          <div class="cal-val" style="color:var(--green)" id="cal-active">${activeCal ?? '—'}</div>
+          <div class="cal-lbl">AKTIV kcal</div>
+        </div>
+        <div class="cal-metric">
+          <div class="cal-val" style="color:var(--text-sec)" id="cal-bmr">${bmrCal ?? '—'}</div>
+          <div class="cal-lbl">GRUNDUMSATZ kcal</div>
+        </div>
+      </div>
+      ${totalCal != null ? `
+      <div style="margin-top:auto">
+        <div class="cal-bar-lbl"><span>GESAMT</span><span id="cal-total">—</span></div>
+        <div class="cal-bar-bg">
+          <div class="cal-bar-fill" id="cal-bar" style="width:0%;background:var(--green)"></div>
+        </div>
+        <div class="cal-bar-lbl" style="margin-top:4px"><span style="color:var(--green)">■ Aktiv ${fillPct}%</span><span style="color:var(--text-muted)">■ Ruhe ${100-fillPct}%</span></div>
+      </div>` : ''}`;
+
+    if (activeCal != null) countUp(document.getElementById('cal-active'), activeCal, 800);
+    if (bmrCal    != null) countUp(document.getElementById('cal-bmr'),    bmrCal,    800);
+    if (totalCal  != null) countUp(document.getElementById('cal-total'),  totalCal,  900, v => Math.round(v) + ' kcal');
+    setTimeout(() => {
+      const bar = document.getElementById('cal-bar');
+      if (bar) bar.style.width = `${fillPct}%`;
+    }, 200);
+
+  } else {
+    const n     = range === '7d' ? 7 : 30;
+    const slice = historyDays.slice(0, n);
+    const rev   = [...slice].reverse();
+    const labels = dayLabels(slice);
+    const active = rev.map(d => d.activeCalories ?? null);
+    const bmr    = rev.map(d => d.bmrCalories    ?? null);
+    const hasData = active.some(v => v != null);
+
+    if (!hasData) {
+      el.innerHTML = `<div class="fa-empty" style="padding:16px 0">Kalorienhistorie noch nicht verfügbar.<br><small>Erst nach erneutem fetch_data.py.</small></div>`;
+      return;
+    }
+
+    const avg = active.filter(Boolean).length
+      ? Math.round(active.filter(Boolean).reduce((a,b)=>a+b,0)/active.filter(Boolean).length) : null;
+
+    el.innerHTML = `
+      <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:4px">
+        <span class="cal-val" style="color:var(--green);font-size:36px">${avg ?? '—'}</span>
+        <span style="font-size:12px;color:var(--text-muted)">kcal/Tag aktiv ø</span>
+      </div>
+      <div class="chart-wrap" style="flex:1"><canvas id="calories-chart"></canvas></div>`;
+
+    charts['calories'] = new Chart($('calories-chart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Aktiv kcal', data: active, backgroundColor: 'rgba(30,215,96,0.6)',  borderRadius: 4, borderSkipped: false, stack: 'cal' },
+          { label: 'Grundumsatz', data: bmr,   backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 4, borderSkipped: false, stack: 'cal' },
+        ],
+      },
+      options: {
+        ...CHART_DEFAULTS,
+        plugins: {
+          ...CHART_DEFAULTS.plugins,
+          legend: { display: true, position: 'top', align: 'end', labels: { color: '#55585f', font: { size: 9 }, boxWidth: 8, boxHeight: 8 } },
+        },
+        scales: {
+          x: xScaleOpts(),
+          y: { min: 0, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#55585f', font: { size: 9 }, callback: v => `${v}` } },
+        },
+      },
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  METABOLIK CARD (TDEE + FFMI + Metabolisches Alter)
+// ═══════════════════════════════════════════════════════════════════════════
+function renderMetabolic() {
+  const el = $('metabolic-body');
+  const bc = data.bodyComposition || [];
+  const latest = bc[0] || {};
+
+  const h   = userCfg.height_cm || 180;
+  const gy  = userCfg.gender === 'female' ? -166 : 5;
+  const byr = userCfg.birth_year || 1990;
+  const age = new Date().getFullYear() - byr;
+  const w   = latest.weight  || 78;
+  const fat = latest.bodyFat || 18;
+
+  // Mifflin-St Jeor BMR
+  const bmr = Math.round(10 * w + 6.25 * h - 5 * age + gy);
+
+  // TDEE
+  const actFactors = { sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725, very_active: 1.9 };
+  const factor = actFactors[userCfg.activity_level] || 1.55;
+  const tdee = Math.round(bmr * factor);
+
+  // FFMI
+  const lbm  = +(w * (1 - fat / 100)).toFixed(1);
+  const hm   = h / 100;
+  const ffmi = +(lbm / (hm * hm)).toFixed(1);
+  const normFFMI = +(ffmi + 6.1 * (1.8 - hm)).toFixed(1);
+  const ffmiDesc = normFFMI < 18 ? 'Unterdurchschn.' : normFFMI < 20 ? 'Durchschnittlich' : normFFMI < 22 ? 'Gut' : normFFMI < 25 ? 'Fortgeschritten' : 'Sehr fortgeschritten';
+  const ffmiColor = normFFMI < 18 ? 'var(--text-muted)' : normFFMI < 22 ? 'var(--green)' : normFFMI < 25 ? 'var(--yellow)' : '#a78bfa';
+
+  // Metabolisches Alter: BMR-Vergleich mit Altersgruppen (Männer, Mifflin-Durchschnitt bei 80kg/180cm)
+  // BMR = 10×80 + 6.25×180 − 5×age + 5 → 800+1125−5age+5 = 1930 - 5age
+  // Für user: BMR = 10×w + 6.25×h − 5×age + gy
+  // Metabolisches Alter = Alter bei dem Referenz-BMR = user BMR
+  // ref_bmr(age) = 10×80 + 6.25×180 - 5×age + 5 = 1930 - 5×age → age = (1930 - bmr) / 5
+  const refBmr0 = 10 * 80 + 6.25 * 180 + gy; // Referenz bei age=0
+  const metAge = Math.round((refBmr0 - bmr) / 5);
+  const metAgeDelta = metAge - age;
+  const metAgeColor = metAgeDelta <= 0 ? 'var(--green)' : metAgeDelta <= 5 ? 'var(--yellow)' : 'var(--red)';
+  const metAgeDesc = metAgeDelta <= -3 ? 'Sehr jung' : metAgeDelta <= 0 ? 'Gut' : metAgeDelta <= 5 ? 'Leicht erhöht' : 'Erhöht';
+
+  const noConfig = !userCfg.height_cm || !userCfg.birth_year;
+
+  el.innerHTML = `
+    ${noConfig ? `<div class="met-config-hint">⚠ Bitte <b>user_config.json</b> mit Größe und Geburtsjahr ausfüllen für genaue Werte.</div>` : ''}
+    <div class="met-grid">
+      <div class="met-tile">
+        <div class="met-val" style="color:var(--green)" id="met-tdee">—</div>
+        <div class="met-unit">kcal/Tag</div>
+        <div class="met-bar-bg"><div class="met-bar-fill" style="background:var(--green);width:${clamp(tdee/4000*100,5,100)}%"></div></div>
+        <div class="met-lbl">TDEE</div>
+        <div class="met-desc">Gesamtenergiebedarf inkl. Aktivität</div>
+      </div>
+      <div class="met-tile">
+        <div class="met-val" style="color:${ffmiColor}" id="met-ffmi">—</div>
+        <div class="met-unit">kg/m²</div>
+        <div class="met-bar-bg"><div class="met-bar-fill" style="background:${ffmiColor};width:${clamp((normFFMI-14)/12*100,5,100)}%"></div></div>
+        <div class="met-lbl">FFMI</div>
+        <div class="met-desc">${ffmiDesc} (nat. Max ≈25)</div>
+      </div>
+      <div class="met-tile">
+        <div class="met-val" style="color:${metAgeColor}" id="met-age">—</div>
+        <div class="met-unit">Jahre</div>
+        <div class="met-bar-bg"><div class="met-bar-fill" style="background:${metAgeColor};width:${clamp((metAge-20)/50*100,5,100)}%"></div></div>
+        <div class="met-lbl">MET. ALTER</div>
+        <div class="met-desc">${metAgeDesc} (Real ${age}J)</div>
+      </div>
+    </div>
+    <div style="font-size:9px;color:var(--text-muted);margin-top:8px">BMR ${bmr} kcal — ${userCfg.activity_level || 'moderate'} × ${factor} — LBM ${lbm} kg</div>`;
+
+  countUp(document.getElementById('met-tdee'), tdee, 1000);
+  countUp(document.getElementById('met-ffmi'), normFFMI, 900, v => v.toFixed(1));
+  countUp(document.getElementById('met-age'),  metAge,  900);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 //  PILL SETUP
 // ═══════════════════════════════════════════════════════════════════════════
 const RENDERS = {
-  recovery: renderRecovery,
-  battery:  renderBattery,
-  sleep:    renderSleep,
-  steps:    renderSteps,
-  stress:   renderStress,
-  activity: renderActivity,
-  bodycomp: renderBodyComp,
+  recovery:  renderRecovery,
+  battery:   renderBattery,
+  sleep:     renderSleep,
+  steps:     renderSteps,
+  stress:    renderStress,
+  activity:  renderActivity,
+  spo2:      renderSpO2,
+  restinghr: renderRestingHR,
+  calories:  renderCalories,
+  bodycomp:  renderBodyComp,
 };
 
 document.querySelectorAll('.time-pills').forEach(pillGroup => {
@@ -1124,6 +1525,10 @@ safeRender(() => renderSteps('today'),     'steps');
 safeRender(() => renderStress('today'),    'stress');
 safeRender(() => renderActivity('today'),  'activity');
 safeRender(() => renderFitnessAge(),       'fitness-age');
+safeRender(() => renderSpO2('today'),      'spo2');
+safeRender(() => renderRestingHR('7d'),    'restinghr');
+safeRender(() => renderCalories('today'),  'calories');
+safeRender(() => renderMetabolic(),        'metabolic');
 safeRender(() => renderBodyComp('today'),  'bodycomp');
 
 })();

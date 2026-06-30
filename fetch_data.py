@@ -248,6 +248,42 @@ def fetch_body_composition(api, start_str, end_str):
     return entries
 
 
+def fetch_spo2(api, date_str):
+    """SpO2 / Blutsauerstoff für einen Tag. Gibt Durchschnittswert zurück."""
+    raw = safe(lambda: api.get_spo2_data(date_str), f"SpO2 {date_str}")
+    if not raw:
+        return None
+    if isinstance(raw, dict):
+        avg = raw.get("averageSpO2") or raw.get("avgSpO2") or raw.get("continuousReadingAvg")
+        if avg is not None:
+            return round(float(avg), 1)
+        readings = raw.get("spO2HRSleepData") or raw.get("readings") or raw.get("dateToSpO2", {})
+        if isinstance(readings, list) and readings:
+            vals = [r.get("spO2Reading") or r.get("value") or r.get("spO2") for r in readings]
+            vals = [v for v in vals if v is not None and v > 0]
+            if vals:
+                return round(sum(vals) / len(vals), 1)
+        if isinstance(readings, dict):
+            vals = [v for v in readings.values() if v is not None and v > 0]
+            if vals:
+                return round(sum(vals) / len(vals), 1)
+    return None
+
+
+def fetch_daily_stats(api, date_str):
+    """Kalorien + Ruhepuls aus get_stats() — ein Call statt zwei."""
+    raw = safe(lambda: api.get_stats(date_str), f"DailyStats {date_str}")
+    if not raw:
+        return {}
+    return {
+        "rhr":            raw.get("restingHeartRate"),
+        "activeCalories": raw.get("activeKilocalories"),
+        "bmrCalories":    raw.get("bmrKilocalories"),
+        "totalCalories":  raw.get("totalKilocalories"),
+        "steps":          raw.get("totalSteps"),
+    }
+
+
 def fetch_training_readiness(api, today_str):
     raw = safe(lambda: api.get_training_readiness(today_str), "Training Readiness")
     if not raw:
@@ -345,11 +381,14 @@ def build_history(api, today, bb_range, steps_range):
         stress = fetch_stress_day(api, d)
         day["avgStress"] = stress.get("avgStressLevel")
 
-        # RHR (nur alle 3 Tage um Rate-Limit zu schonen — täglich langsam)
+        # Tages-Stats: RHR + Kalorien in einem Call
         if i % 2 == 0:
             time.sleep(0.2)
-        rhr = fetch_rhr(api, d)
-        day["rhr"] = rhr
+        daily_stats = fetch_daily_stats(api, d)
+        rhr = daily_stats.get("rhr") or fetch_rhr(api, d)   # fallback auf alten Endpunkt
+        day["rhr"]            = rhr
+        day["activeCalories"] = daily_stats.get("activeCalories")
+        day["bmrCalories"]    = daily_stats.get("bmrCalories")
 
         # HRV (lastNight — oft null bei manchen Geräten)
         hrv_raw = safe(lambda dd=d: api.get_hrv_data(dd), f"HRV {d}")
@@ -399,6 +438,16 @@ def main():
 
     log.info("Training Readiness...")
     training_readiness = fetch_training_readiness(api, today_str)
+
+    log.info("SpO2 (7 Tage)...")
+    spo2_history = []
+    for i in range(7):
+        d = (today - timedelta(days=i)).isoformat()
+        val = fetch_spo2(api, d)
+        spo2_history.append({"date": d, "value": val})
+        if i < 6:
+            time.sleep(0.25)
+    spo2_today = spo2_history[0]["value"] if spo2_history else None
 
     # ── Range-Abfragen (effizient) ──────────────────────────────────────────
     log.info("Body Battery (30 Tage Range)...")
@@ -452,6 +501,11 @@ def main():
         "trainingReadiness":  training_readiness,
         "stepsToday":         steps_today,
         "lastActivity":       last_activity,
+        # SpO2 (Blutsauerstoff)
+        "spo2": {
+            "today":   spo2_today,
+            "history": spo2_history,
+        },
         # Körperdaten (Index S2) — neuester Eintrag zuerst
         "bodyComposition":    body_composition,
         # 30-Tage History

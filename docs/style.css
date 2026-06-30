@@ -169,11 +169,13 @@ body::after {
   grid-template-rows: auto;
   gap: 12px;
   grid-template-areas:
-    "recovery  battery"
-    "recovery  sleep"
-    "steps     stress"
-    "activity  fitness-age"
-    "bodycomp  bodycomp";
+    "recovery   battery"
+    "recovery   sleep"
+    "steps      stress"
+    "activity   fitness-age"
+    "spo2       restinghr"
+    "calories   metabolic"
+    "bodycomp   bodycomp";
 }
 
 .card-recovery    { grid-area: recovery; }
@@ -183,6 +185,10 @@ body::after {
 .card-stress      { grid-area: stress; }
 .card-activity    { grid-area: activity; }
 .card-fitness-age { grid-area: fitness-age; }
+.card-spo2        { grid-area: spo2; }
+.card-restinghr   { grid-area: restinghr; }
+.card-calories    { grid-area: calories; }
+.card-metabolic   { grid-area: metabolic; }
 .card-body-comp   { grid-area: bodycomp; }
 
 /* ── Cards ─────────────────────────────────────────────────────────── */
@@ -1109,6 +1115,245 @@ body::after {
   display: inline-block;
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   SPO2 CARD
+══════════════════════════════════════════════════════════════════════ */
+.spo2-big {
+  font-size: 64px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -2px;
+  line-height: 1;
+}
+
+.spo2-unit {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-sec);
+  margin-left: 2px;
+}
+
+.spo2-status {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  margin-top: 6px;
+  display: inline-block;
+}
+
+.spo2-status.optimal  { background: var(--green-dim);   color: var(--green); }
+.spo2-status.moderate { background: var(--yellow-dim);  color: var(--yellow); }
+.spo2-status.low      { background: var(--red-dim);     color: var(--red); }
+
+.spo2-dots {
+  display: flex;
+  gap: 5px;
+  align-items: flex-end;
+  margin-top: 16px;
+  height: 36px;
+}
+
+.spo2-dot-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.spo2-bar {
+  width: 100%;
+  border-radius: 3px;
+  min-height: 4px;
+}
+
+.spo2-dot-lbl {
+  font-size: 8px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.spo2-info {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RESTING HR CARD
+══════════════════════════════════════════════════════════════════════ */
+.rhr-big {
+  font-size: 64px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -2px;
+  line-height: 1;
+  color: var(--red);
+}
+
+.rhr-unit {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-left: 3px;
+}
+
+.rhr-sub {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.rhr-trend {
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.rhr-trend.up   { color: var(--red); }
+.rhr-trend.down { color: var(--green); }
+.rhr-trend.flat { color: var(--text-muted); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   KALORIEN CARD
+══════════════════════════════════════════════════════════════════════ */
+.cal-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.cal-metric {
+  flex: 1;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+
+.cal-val {
+  font-size: 28px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.cal-lbl {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.cal-bar-wrap {
+  margin-top: auto;
+}
+
+.cal-bar-bg {
+  height: 4px;
+  background: var(--surface-1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.cal-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.7s ease;
+}
+
+.cal-bar-lbl {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   METABOLIK CARD (TDEE + FFMI + Metabolisches Alter)
+══════════════════════════════════════════════════════════════════════ */
+.met-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  flex: 1;
+}
+
+.met-tile {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.met-val {
+  font-size: 26px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.met-unit {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.met-lbl {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+.met-bar-bg {
+  height: 3px;
+  background: var(--surface-0);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.met-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+}
+
+.met-desc {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.met-config-hint {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--surface-1);
+  border-radius: var(--radius-xs);
+  border-left: 2px solid var(--yellow);
+}
+
 /* ── Animations ────────────────────────────────────────────────────── */
 @keyframes cardReveal {
   0%   { opacity: 0;  transform: translateY(18px) scale(0.97); }
@@ -1139,6 +1384,8 @@ body::after {
       "battery     sleep"
       "steps       stress"
       "activity    fitness-age"
+      "spo2        restinghr"
+      "calories    metabolic"
       "bodycomp    bodycomp";
   }
 }
@@ -1192,7 +1439,11 @@ body::after {
   .card-steps       { order: 5; }
   .card-activity    { order: 6; }
   .card-fitness-age { order: 7; }
-  .card-body-comp   { order: 8; }
+  .card-spo2        { order: 8; }
+  .card-restinghr   { order: 9; }
+  .card-calories    { order: 10; }
+  .card-metabolic   { order: 11; }
+  .card-body-comp   { order: 12; }
 
   /* Körperdaten auf Mobile: 2-spaltig */
   .bc-grid { gap: 8px; }

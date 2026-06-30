@@ -1,0 +1,15 @@
+{
+  "_comment": "Deine persönlichen Körperdaten. Einmalig ausfüllen. Wird NICHT von fetch_data.py überschrieben.",
+  "height_cm": 188,
+  "birth_year": 1990,
+  "gender": "male",
+  "step_goal": 10000,
+  "activity_level": "moderate",
+  "_activity_levels_help": {
+    "sedentary":   "Sitzend (kaum Bewegung)",
+    "light":       "Leicht aktiv (1–3 Tage Sport/Woche)",
+    "moderate":    "Moderat aktiv (3–5 Tage Sport/Woche)",
+    "active":      "Sehr aktiv (6–7 Tage Sport/Woche)",
+    "very_active": "Extrem aktiv (2× täglich Training)"
+  }
+}
