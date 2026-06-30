@@ -513,6 +513,7 @@ function renderBattery(range) {
   if (range === 'today') {
     const net = (today.charged ?? 0) - (today.drained ?? 0);
     const netStr = net > 0 ? `+${net}` : `${net}`;
+    const pct = display ?? 0;
 
     el.innerHTML = `
       <div class="bb-top">
@@ -520,39 +521,35 @@ function renderBattery(range) {
         <span class="bb-unit">%</span>
         <span class="bb-trend" style="color:${net>0?'var(--green)':net<0?'var(--red)':'var(--text-muted)'}">${net !== 0 ? netStr : ''}</span>
       </div>
-      <div class="bb-label">${bb.current != null ? 'AKTUELL' : 'GELADEN HEUTE'}</div>
+      <div class="bb-label">${bb.current != null ? 'AKTUELL' : 'LETZTER STAND'}</div>
       ${display != null ? `<span class="status-badge ${display >= 70 ? 'badge-green' : display >= 40 ? 'badge-yellow' : 'badge-red'}">${display >= 70 ? 'OPTIMAL' : display >= 40 ? 'MODERAT' : 'NIEDRIG'}</span>` : ''}
-      <div class="bb-today-stats">
+
+      <!-- Batterie-Gauge: animierter Balken -->
+      <div style="margin:12px 0 6px">
+        <div style="height:10px;background:rgba(255,255,255,0.06);border-radius:5px;overflow:hidden">
+          <div id="bb-gauge-fill"
+               style="height:100%;width:0;border-radius:5px;background:linear-gradient(90deg,${color},${color}dd);
+                      transition:width 1.3s cubic-bezier(0.4,0,0.2,1);
+                      box-shadow:0 0 8px ${color}66"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-muted);margin-top:4px">
+          <span>0%</span><span>50%</span><span>100%</span>
+        </div>
+      </div>
+
+      <!-- Geladen / Verbraucht -->
+      <div class="bb-today-stats" style="margin-top:auto">
         <div class="bb-stat"><span class="bb-stat-dot" style="background:#1ed760"></span><span class="bb-stat-val">${today.charged ?? '—'}</span><span class="bb-stat-lbl">Geladen</span></div>
         <div class="bb-stat"><span class="bb-stat-dot" style="background:#f3727f"></span><span class="bb-stat-val">${today.drained ?? '—'}</span><span class="bb-stat-lbl">Verbraucht</span></div>
-      </div>
-      <div class="chart-wrap"><canvas id="battery-chart"></canvas></div>`;
+      </div>`;
 
-    // Animate main number
+    // Animate main number + gauge
     const bbNumEl = el.querySelector('.bb-value');
     if (bbNumEl && display != null) countUp(bbNumEl, display, 900);
-
-    const slice  = bbHist.slice(0, 7);
-    const labels = [...slice].reverse().map(d => new Date(d.date + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'short' }));
-
-    charts['battery'] = new Chart($('battery-chart').getContext('2d'), {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [
-          { label: 'Geladen',    data: [...slice].reverse().map(d => d.charged ?? 0), backgroundColor: 'rgba(30,215,96,0.65)',    hoverBackgroundColor: 'rgba(30,215,96,0.90)',    borderRadius: 4, borderSkipped: false },
-          { label: 'Verbraucht', data: [...slice].reverse().map(d => d.drained ?? 0), backgroundColor: 'rgba(243,114,127,0.50)', hoverBackgroundColor: 'rgba(243,114,127,0.80)', borderRadius: 4, borderSkipped: false },
-        ],
-      },
-      options: {
-        ...CHART_DEFAULTS,
-        plugins: {
-          ...CHART_DEFAULTS.plugins,
-          legend: { display: true, position: 'top', align: 'end', labels: { color: '#55585f', font: { size: 9, family: 'Inter' }, boxWidth: 8, boxHeight: 8, padding: 8 } },
-        },
-        scales: { x: xScaleOpts(), y: yScaleOpts(0, 100, 25) },
-      },
-    });
+    setTimeout(() => {
+      const fill = document.getElementById('bb-gauge-fill');
+      if (fill) fill.style.width = `${pct}%`;
+    }, 200);
 
   } else {
     // Für 7T/30T: Range aus history.days
@@ -1442,24 +1439,40 @@ function renderMetabolic() {
   const factor = actFactors[userCfg.activity_level] || 1.55;
   const tdee = Math.round(bmr * factor);
 
-  // FFMI
-  const lbm  = +(w * (1 - fat / 100)).toFixed(1);
+  // FFMI = Muskelindex (Fat-Free Mass Index)
+  // Berechnet Muskelmasse relativ zur Körpergröße: höher = mehr Muskeln
+  const lbm  = +(w * (1 - fat / 100)).toFixed(1);   // Lean Body Mass (kg)
   const hm   = h / 100;
   const ffmi = +(lbm / (hm * hm)).toFixed(1);
-  const normFFMI = +(ffmi + 6.1 * (1.8 - hm)).toFixed(1);
-  const ffmiDesc = normFFMI < 18 ? 'Unterdurchschn.' : normFFMI < 20 ? 'Durchschnittlich' : normFFMI < 22 ? 'Gut' : normFFMI < 25 ? 'Fortgeschritten' : 'Sehr fortgeschritten';
+  const normFFMI = +(ffmi + 6.1 * (1.8 - hm)).toFixed(1); // Normalisiert auf 1.8m
+  const ffmiDesc = normFFMI < 18 ? 'Wenig Muskeln' : normFFMI < 20 ? 'Durchschnitt' : normFFMI < 22 ? 'Gut' : normFFMI < 25 ? 'Athletisch' : 'Sehr atletisch';
   const ffmiColor = normFFMI < 18 ? 'var(--text-muted)' : normFFMI < 22 ? 'var(--green)' : normFFMI < 25 ? 'var(--yellow)' : '#a78bfa';
 
-  // Metabolisches Alter: BMR-Vergleich mit Altersgruppen (Männer, Mifflin-Durchschnitt bei 80kg/180cm)
-  // BMR = 10×80 + 6.25×180 − 5×age + 5 → 800+1125−5age+5 = 1930 - 5age
-  // Für user: BMR = 10×w + 6.25×h − 5×age + gy
-  // Metabolisches Alter = Alter bei dem Referenz-BMR = user BMR
-  // ref_bmr(age) = 10×80 + 6.25×180 - 5×age + 5 = 1930 - 5×age → age = (1930 - bmr) / 5
-  const refBmr0 = 10 * 80 + 6.25 * 180 + gy; // Referenz bei age=0
-  const metAge = Math.round((refBmr0 - bmr) / 5);
-  const metAgeDelta = metAge - age;
-  const metAgeColor = metAgeDelta <= 0 ? 'var(--green)' : metAgeDelta <= 5 ? 'var(--yellow)' : 'var(--red)';
-  const metAgeDesc = metAgeDelta <= -3 ? 'Sehr jung' : metAgeDelta <= 0 ? 'Gut' : metAgeDelta <= 5 ? 'Leicht erhöht' : 'Erhöht';
+  // Metabolisches Alter: direkt von Garmin-Waage (genauester Wert)
+  // Fallback: Körperfett-basiert — niedrigerer KFA für das eigene Gewicht = jünger
+  const garminMetAge = latest.metabolicAge ?? null;
+  let metAge, metAgeDelta, metAgeColor, metAgeDesc, metAgeNote;
+
+  if (garminMetAge != null) {
+    // Garmin-Waage liefert eigenen Wert (z.B. aus bioelektrischer Impedanz)
+    metAge = garminMetAge;
+    metAgeDelta = metAge - age;
+    metAgeNote = 'von Garmin-Waage';
+  } else {
+    // Schätzung: KEINE exakte Formel möglich ohne gemessenen Grundumsatz
+    // Zeige stattdessen BMR direkt
+    metAge = null;
+    metAgeDelta = null;
+    metAgeNote = 'Nur mit Garmin-Waage verfügbar';
+  }
+
+  if (metAgeDelta != null) {
+    metAgeColor = metAgeDelta <= 0 ? 'var(--green)' : metAgeDelta <= 5 ? 'var(--yellow)' : 'var(--red)';
+    metAgeDesc  = metAgeDelta <= -5 ? 'Sehr jung' : metAgeDelta <= 0 ? 'Jünger als real' : metAgeDelta <= 5 ? 'Leicht erhöht' : 'Erhöht';
+  } else {
+    metAgeColor = 'var(--text-muted)';
+    metAgeDesc  = '';
+  }
 
   const noConfig = !userCfg.height_cm || !userCfg.birth_year;
 
@@ -1471,28 +1484,27 @@ function renderMetabolic() {
         <div class="met-unit">kcal/Tag</div>
         <div class="met-bar-bg"><div class="met-bar-fill" style="background:var(--green);width:${clamp(tdee/4000*100,5,100)}%"></div></div>
         <div class="met-lbl">TDEE</div>
-        <div class="met-desc">Gesamtenergiebedarf inkl. Aktivität</div>
+        <div class="met-desc">Kalorienbedarf · BMR ${bmr} kcal</div>
       </div>
       <div class="met-tile">
         <div class="met-val" style="color:${ffmiColor}" id="met-ffmi">—</div>
         <div class="met-unit">kg/m²</div>
         <div class="met-bar-bg"><div class="met-bar-fill" style="background:${ffmiColor};width:${clamp((normFFMI-14)/12*100,5,100)}%"></div></div>
-        <div class="met-lbl">FFMI</div>
-        <div class="met-desc">${ffmiDesc} (nat. Max ≈25)</div>
+        <div class="met-lbl">MUSKELINDEX</div>
+        <div class="met-desc">${ffmiDesc} · LBM ${lbm} kg</div>
       </div>
       <div class="met-tile">
-        <div class="met-val" style="color:${metAgeColor}" id="met-age">—</div>
+        <div class="met-val" style="color:${metAgeColor}" id="met-age">${metAge == null ? '—' : metAge}</div>
         <div class="met-unit">Jahre</div>
-        <div class="met-bar-bg"><div class="met-bar-fill" style="background:${metAgeColor};width:${clamp((metAge-20)/50*100,5,100)}%"></div></div>
+        ${metAge != null ? `<div class="met-bar-bg"><div class="met-bar-fill" style="background:${metAgeColor};width:${clamp((metAge-20)/50*100,5,100)}%"></div></div>` : ''}
         <div class="met-lbl">MET. ALTER</div>
-        <div class="met-desc">${metAgeDesc} (Real ${age}J)</div>
+        <div class="met-desc">${metAge != null ? `${metAgeDesc} (real ${age}J)` : metAgeNote}</div>
       </div>
-    </div>
-    <div style="font-size:9px;color:var(--text-muted);margin-top:8px">BMR ${bmr} kcal — ${userCfg.activity_level || 'moderate'} × ${factor} — LBM ${lbm} kg</div>`;
+    </div>`;
 
   countUp(document.getElementById('met-tdee'), tdee, 1000);
   countUp(document.getElementById('met-ffmi'), normFFMI, 900, v => v.toFixed(1));
-  countUp(document.getElementById('met-age'),  metAge,  900);
+  if (metAge != null) countUp(document.getElementById('met-age'), metAge, 900);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

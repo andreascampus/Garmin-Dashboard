@@ -235,13 +235,15 @@ def fetch_body_composition(api, start_str, end_str):
             muscle_val = round(raw_muscle / 1000, 1) if raw_muscle > 100 else round(raw_muscle, 1)
 
         entries.append({
-            "date":        d,
-            "weight":      weight_kg,          # kg
-            "bmi":         round(item.get("bmi"), 1) if item.get("bmi") else None,
-            "bodyFat":     item.get("bodyFat"),  # %
-            "muscleMass":  muscle_val,           # kg oder %
-            "boneMass":    bonemass_kg,           # kg
-            "bodyWater":   item.get("bodyWater"), # %
+            "date":          d,
+            "weight":        weight_kg,          # kg
+            "bmi":           round(item.get("bmi"), 1) if item.get("bmi") else None,
+            "bodyFat":       item.get("bodyFat"),         # %
+            "muscleMass":    muscle_val,                  # kg oder %
+            "boneMass":      bonemass_kg,                 # kg
+            "bodyWater":     item.get("bodyWater"),       # %
+            "metabolicAge":  item.get("metabolicAge"),    # Jahre (von Garmin)
+            "visceralFat":   item.get("visceralFat"),     # Score 1–20
         })
 
     entries.sort(key=lambda x: x["date"], reverse=True)
