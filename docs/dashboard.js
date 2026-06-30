@@ -126,6 +126,9 @@ function destroyChart(key) {
 
 // ── Error-Boundary: schützt jede Karte vor Abstürzen ────────────────────────
 function safeRender(fn, cardId) {
+  // Shimmer entfernen bevor gerendert wird
+  const bodyEl = $(`${cardId}-body`);
+  if (bodyEl) bodyEl.classList.remove('card-loading');
   try {
     fn();
   } catch (err) {
@@ -150,7 +153,11 @@ function safeRender(fn, cardId) {
 const CHART_DEFAULTS = {
   responsive: true,
   maintainAspectRatio: false,
-  animation: { duration: 700, easing: 'easeOutQuart' },
+  animation: {
+    duration: 800,
+    easing: 'easeOutQuart',
+    delay: (context) => context.dataIndex * 18,
+  },
   plugins: {
     legend: { display: false },
     tooltip: {
@@ -163,6 +170,20 @@ const CHART_DEFAULTS = {
     },
   },
 };
+
+// ── Chart Gradient Fill Helper ───────────────────────────────────────────────
+// Erstellt einen vertikalen Canvas-Gradient für Linien-Chart Flächen
+function gradientFill(r, g, b, alpha1 = 0.38, alpha2 = 0.02) {
+  return (context) => {
+    const { chart } = context;
+    const { ctx, chartArea } = chart;
+    if (!chartArea) return `rgba(${r},${g},${b},${alpha1})`;
+    const grad = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+    grad.addColorStop(0, `rgba(${r},${g},${b},${alpha1})`);
+    grad.addColorStop(1, `rgba(${r},${g},${b},${alpha2})`);
+    return grad;
+  };
+}
 
 function xScaleOpts() {
   return {
@@ -500,6 +521,7 @@ function renderBattery(range) {
         <span class="bb-trend" style="color:${net>0?'var(--green)':net<0?'var(--red)':'var(--text-muted)'}">${net !== 0 ? netStr : ''}</span>
       </div>
       <div class="bb-label">${bb.current != null ? 'AKTUELL' : 'GELADEN HEUTE'}</div>
+      ${display != null ? `<span class="status-badge ${display >= 70 ? 'badge-green' : display >= 40 ? 'badge-yellow' : 'badge-red'}">${display >= 70 ? 'OPTIMAL' : display >= 40 ? 'MODERAT' : 'NIEDRIG'}</span>` : ''}
       <div class="bb-today-stats">
         <div class="bb-stat"><span class="bb-stat-dot" style="background:#1ed760"></span><span class="bb-stat-val">${today.charged ?? '—'}</span><span class="bb-stat-lbl">Geladen</span></div>
         <div class="bb-stat"><span class="bb-stat-dot" style="background:#f3727f"></span><span class="bb-stat-val">${today.drained ?? '—'}</span><span class="bb-stat-lbl">Verbraucht</span></div>
@@ -600,6 +622,7 @@ function renderSleep(range) {
         <span class="sleep-score">${sleep.score ?? '—'}</span>
         <span class="sleep-dur">${fmtHM(sleep.totalSeconds)}</span>
       </div>
+      ${sleep.score != null ? `<span class="status-badge ${sleep.score >= 80 ? 'badge-purple' : sleep.score >= 60 ? 'badge-yellow' : 'badge-red'}">${sleep.score >= 80 ? 'GUT GESCHLAFEN' : sleep.score >= 60 ? 'AUSREICHEND' : 'SCHLECHT'}</span>` : ''}
       <div class="phase-bar" id="phase-bar">
         <div class="phase deep"  id="ph-deep"></div>
         <div class="phase rem"   id="ph-rem"></div>
@@ -672,7 +695,8 @@ function renderSleep(range) {
             data: hours,
             type: 'line',
             borderColor: '#539df5',
-            backgroundColor: 'transparent',
+            backgroundColor: gradientFill(83, 157, 245, 0.30, 0.02),
+            fill: true,
             borderWidth: 2,
             pointRadius: 3,
             pointBackgroundColor: '#539df5',
@@ -732,6 +756,7 @@ function renderSteps(range) {
       <div class="steps-track">
         <div class="steps-fill" id="steps-fill" style="background:${color}"></div>
       </div>
+      ${stepsToday != null ? `<span class="status-badge ${pct >= 100 ? 'badge-green' : pct >= 70 ? 'badge-yellow' : 'badge-red'}">${pct >= 100 ? 'ZIEL ERREICHT' : pct >= 70 ? 'FAST DA' : 'WEITER SO'}</span>` : ''}
       ${goalRate != null ? `
       <div style="margin-top:10px;background:var(--surface-1);border:1px solid var(--border-subtle);border-radius:8px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center">
         <span style="font-size:8px;font-weight:700;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase">ZIEL-RATE 30T</span>
@@ -1258,6 +1283,7 @@ function renderRestingHR(range) {
       <span class="rhr-unit">bpm</span>
     </div>
     <div class="rhr-sub">RUHEPULS HEUTE</div>
+    ${rhrToday != null ? `<span class="status-badge ${rhrToday < 55 ? 'badge-green' : rhrToday < 70 ? 'badge-blue' : rhrToday < 85 ? 'badge-yellow' : 'badge-red'}" style="margin-top:4px">${rhrToday < 55 ? 'EXZELLENT' : rhrToday < 70 ? 'NORMAL' : rhrToday < 85 ? 'ERHÖHT' : 'HOCH'}</span>` : ''}
     ${trend != null ? `<div class="rhr-trend ${trendCls}">${trendStr} (${range === '7d' ? '7T' : '30T'})</div>` : ''}
     <div class="chart-wrap" style="flex:1;margin-top:10px"><canvas id="restinghr-chart"></canvas></div>
     ${mn != null ? `<div style="display:flex;justify-content:space-between;margin-top:8px;font-size:9px;color:var(--text-muted)"><span>MIN ${mn} bpm</span><span>ø ${avg} bpm</span><span>MAX ${mx} bpm</span></div>` : ''}`;
@@ -1278,7 +1304,7 @@ function renderRestingHR(range) {
         label: 'RHR bpm',
         data: vals,
         borderColor: '#9333ea',
-        backgroundColor: 'rgba(147,51,234,0.10)',
+        backgroundColor: gradientFill(147, 51, 234, 0.40, 0.02),
         fill: true,
         borderWidth: 2,
         pointRadius: vals.map(v => v != null ? 3 : 0),
@@ -1470,6 +1496,30 @@ function renderMetabolic() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+//  PILL INDICATOR — iOS Segmented Control Slider
+// ═══════════════════════════════════════════════════════════════════════════
+function initPillIndicator(pillGroup) {
+  let indicator = pillGroup.querySelector('.pill-indicator');
+  if (!indicator) {
+    indicator = document.createElement('div');
+    indicator.className = 'pill-indicator';
+    pillGroup.insertBefore(indicator, pillGroup.firstChild);
+    pillGroup.classList.add('has-indicator');
+  }
+  const active = pillGroup.querySelector('.pill.active');
+  if (active) {
+    // Kein Transition beim ersten Setzen
+    indicator.style.transition = 'none';
+    indicator.style.left  = active.offsetLeft + 'px';
+    indicator.style.width = active.offsetWidth + 'px';
+    // Transition wieder aktivieren
+    requestAnimationFrame(() => {
+      indicator.style.transition = '';
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 //  PILL SETUP
 // ═══════════════════════════════════════════════════════════════════════════
 const RENDERS = {
@@ -1493,6 +1543,7 @@ document.querySelectorAll('.time-pills').forEach(pillGroup => {
 
       pillGroup.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      initPillIndicator(pillGroup); // Slider aktualisieren
 
       // Fade-Out → Render → Fade-In
       const bodyEl = document.getElementById(`${card}-body`);
@@ -1514,6 +1565,12 @@ document.querySelectorAll('.time-pills').forEach(pillGroup => {
     });
   });
 });
+
+// ── Shimmer-Skeleton auf allen Karten anzeigen (vor dem ersten Render) ──────
+document.querySelectorAll('.card-body').forEach(el => el.classList.add('card-loading'));
+
+// ── Pill Indicators initialisieren ───────────────────────────────────────────
+document.querySelectorAll('.time-pills').forEach(initPillIndicator);
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  INITIAL RENDER — alle Karten mit "today" starten

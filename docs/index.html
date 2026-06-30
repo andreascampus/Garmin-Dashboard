@@ -13,6 +13,13 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Animierte Hintergrund-Orbs -->
+  <div class="bg-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
   <div class="app">
 
     <header class="header">
@@ -28,7 +35,10 @@
       <div class="header-right">
         <span class="header-date" id="header-date">—</span>
         <div class="header-updated">
-          <span class="updated-label">Aktualisiert</span>
+          <div class="updated-label-row">
+            <span class="live-dot"></span>
+            <span class="updated-label">Aktualisiert</span>
+          </div>
           <span class="updated-time" id="updated-time">—</span>
         </div>
       </div>

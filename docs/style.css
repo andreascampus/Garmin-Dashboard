@@ -2,7 +2,7 @@
    Garmin Dashboard — WHOOP-inspired Design
    ═══════════════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Barlow+Condensed:wght@700;800;900&display=swap');
 
 :root {
   /* ── Backgrounds ── */
@@ -57,15 +57,62 @@ html { font-size: 16px; }
 
 body {
   background: var(--bg);
-  background-image:
-    radial-gradient(ellipse 70% 35% at 50% -5%, rgba(30,215,96,0.07) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 20% at 100% 100%, rgba(83,157,245,0.04) 0%, transparent 60%);
   color: var(--text);
   font-family: 'Inter', -apple-system, sans-serif;
   font-feature-settings: "cv01", "ss03";
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Animated Background Orbs ───────────────────────────────────────── */
+.bg-orbs {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  will-change: transform;
+}
+
+.orb-1 {
+  width: 700px; height: 550px;
+  background: radial-gradient(ellipse at center, rgba(30,215,96,0.07) 0%, transparent 70%);
+  top: -12%; left: -6%;
+  animation: orbFloat1 22s ease-in-out infinite alternate;
+}
+
+.orb-2 {
+  width: 550px; height: 450px;
+  background: radial-gradient(ellipse at center, rgba(83,157,245,0.06) 0%, transparent 70%);
+  bottom: -8%; right: -5%;
+  animation: orbFloat2 28s ease-in-out infinite alternate;
+}
+
+.orb-3 {
+  width: 450px; height: 380px;
+  background: radial-gradient(ellipse at center, rgba(167,139,250,0.05) 0%, transparent 70%);
+  top: 38%; right: 18%;
+  animation: orbFloat3 18s ease-in-out 3s infinite alternate;
+}
+
+@keyframes orbFloat1 {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(50px, 35px) scale(1.12); }
+}
+@keyframes orbFloat2 {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(-35px, -28px) scale(0.94); }
+}
+@keyframes orbFloat3 {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(-25px, 18px) scale(1.09); }
 }
 
 /* Subtle noise grain overlay */
@@ -85,6 +132,8 @@ body::after {
   max-width: 1200px;
   margin: 0 auto;
   padding: 36px 24px 56px;
+  position: relative;
+  z-index: 1;
 }
 
 /* ── Header ────────────────────────────────────────────────────────── */
@@ -149,6 +198,28 @@ body::after {
   gap: 2px;
 }
 
+.updated-label-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  justify-content: flex-end;
+}
+
+/* Live Puls-Dot */
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+  animation: livePulse 2.4s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1;   box-shadow: 0 0 0 0   var(--green-glow); }
+  50%       { opacity: 0.6; box-shadow: 0 0 0 5px rgba(30,215,96,0); }
+}
+
 .updated-label {
   font-size: 9px;
   letter-spacing: 2px;
@@ -191,11 +262,35 @@ body::after {
 .card-metabolic   { grid-area: metabolic; }
 .card-body-comp   { grid-area: bodycomp; }
 
+/* ── Per-Card Gradient-Kante & Hover-Farben ──────────────────────────── */
+.card-recovery    { --card-a: rgba(30,215,96,0.32);   --card-b: rgba(30,215,96,0.10); }
+.card-battery     { --card-a: rgba(30,215,96,0.26);   --card-b: rgba(83,157,245,0.18); }
+.card-sleep       { --card-a: rgba(167,139,250,0.30); --card-b: rgba(83,157,245,0.18); }
+.card-steps       { --card-a: rgba(30,215,96,0.26);   --card-b: rgba(255,164,43,0.14); }
+.card-stress      { --card-a: rgba(255,164,43,0.28);  --card-b: rgba(243,114,127,0.18); }
+.card-activity    { --card-a: rgba(83,157,245,0.28);  --card-b: rgba(167,139,250,0.18); }
+.card-fitness-age { --card-a: rgba(255,164,43,0.28);  --card-b: rgba(30,215,96,0.16); }
+.card-spo2        { --card-a: rgba(83,157,245,0.28);  --card-b: rgba(167,139,250,0.18); }
+.card-restinghr   { --card-a: rgba(147,51,234,0.32);  --card-b: rgba(83,157,245,0.18); }
+.card-calories    { --card-a: rgba(255,164,43,0.28);  --card-b: rgba(30,215,96,0.16); }
+.card-metabolic   { --card-a: rgba(167,139,250,0.28); --card-b: rgba(83,157,245,0.18); }
+.card-body-comp   { --card-a: rgba(83,157,245,0.28);  --card-b: rgba(167,139,250,0.18); }
+
 /* ── Cards ─────────────────────────────────────────────────────────── */
 .card {
-  background: var(--surface-0);
-  border: 1px solid var(--border);
+  /* Glassmorphism + Gradient-Kante */
+  background-image:
+    linear-gradient(rgba(14,15,16,0.84), rgba(14,15,16,0.84)),
+    linear-gradient(135deg,
+      var(--card-a, rgba(30,215,96,0.22)) 0%,
+      rgba(255,255,255,0.03) 50%,
+      var(--card-b, rgba(83,157,245,0.14)) 100%);
+  background-origin: padding-box, border-box;
+  background-clip:   padding-box, border-box;
+  border: 1px solid transparent;
   border-radius: var(--radius);
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -204,18 +299,16 @@ body::after {
   transform: translateY(18px) scale(0.97);
   animation: cardReveal 0.70s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   animation-delay: var(--delay, 0s);
-  /* Hover transition — alle relevanten Properties */
   transition:
-    background   0.25s ease,
-    border-color 0.25s ease,
-    box-shadow   0.35s ease,
-    transform    0.30s cubic-bezier(0.34, 1.56, 0.64, 1);
+    background-image 0.30s ease,
+    box-shadow       0.35s ease,
+    transform        0.30s cubic-bezier(0.34, 1.56, 0.64, 1);
   will-change: transform;
   position: relative;
   overflow: hidden;
 }
 
-/* Schimmernder Top-Lichtstrahl — sichtbar nur beim Hover */
+/* Schimmernder Top-Lichtstrahl — per-Card-Farbe, sichtbar beim Hover */
 .card::before {
   content: '';
   position: absolute;
@@ -224,9 +317,9 @@ body::after {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(30,215,96,0.0) 20%,
-    rgba(30,215,96,0.6) 50%,
-    rgba(30,215,96,0.0) 80%,
+    var(--card-a, rgba(30,215,96,0.3)) 20%,
+    rgba(255,255,255,0.6) 50%,
+    var(--card-a, rgba(30,215,96,0.3)) 80%,
     transparent 100%
   );
   opacity: 0;
@@ -238,12 +331,16 @@ body::after {
 }
 
 .card:hover {
-  background: var(--surface-1);
-  border-color: rgba(30,215,96,0.25);
+  background-image:
+    linear-gradient(rgba(14,15,16,0.78), rgba(14,15,16,0.78)),
+    linear-gradient(135deg,
+      var(--card-a, rgba(30,215,96,0.44)) 0%,
+      rgba(255,255,255,0.06) 50%,
+      var(--card-b, rgba(83,157,245,0.28)) 100%);
   box-shadow:
     var(--shadow-card),
-    0 0 0 1px rgba(30,215,96,0.08),
-    0 8px 32px rgba(30,215,96,0.06);
+    0 0 0 1px rgba(255,255,255,0.04),
+    0 12px 40px rgba(0,0,0,0.35);
   transform: translateY(-3px) scale(1.004);
 }
 
@@ -272,7 +369,25 @@ body::after {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-pill);
   padding: 3px;
+  position: relative; /* for pill-indicator */
 }
+
+/* Pill Indicator — iOS Segmented Control Effekt */
+.pill-indicator {
+  position: absolute;
+  top: 3px;
+  height: calc(100% - 6px);
+  background: rgba(255,255,255,0.16);
+  border-radius: var(--radius-pill);
+  transition:
+    left  0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+  z-index: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.pill { position: relative; z-index: 1; }
 
 .pill {
   font-family: 'Inter', sans-serif;
@@ -303,9 +418,14 @@ body::after {
 }
 
 .pill.active {
-  background: rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.14); /* Fallback vor JS */
   color: var(--text);
   transform: scale(1);
+}
+
+/* Wenn Pill-Indicator aktiv ist, kein eigenes Background mehr */
+.time-pills.has-indicator .pill.active {
+  background: transparent;
 }
 
 /* ── Card Body ──────────────────────────────────────────────────────── */
@@ -1354,6 +1474,94 @@ body::after {
   border-left: 2px solid var(--yellow);
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   SPORT-SCHRIFT FÜR ZAHLEN (Barlow Condensed)
+══════════════════════════════════════════════════════════════════════ */
+.ring-pct, .bb-value, .sleep-score, .steps-value, .metric-big,
+.fa-value, .bc-weight, .spo2-big, .rhr-big, .hrv-value, .readiness-val {
+  font-family: 'Barlow Condensed', 'Inter', sans-serif;
+  font-weight: 900;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ZAHL-GLOW-EFFEKTE
+══════════════════════════════════════════════════════════════════════ */
+.ring-pct {
+  text-shadow: 0 0 30px currentColor, 0 0 60px rgba(30,215,96,0.20);
+}
+.sleep-score {
+  text-shadow: 0 0 28px rgba(167,139,250,0.70), 0 0 55px rgba(167,139,250,0.22);
+}
+.bb-value, .metric-big, .steps-value {
+  text-shadow: 0 0 24px currentColor;
+}
+.fa-value {
+  text-shadow: 0 0 24px currentColor;
+}
+.spo2-big {
+  text-shadow: 0 0 26px rgba(83,157,245,0.65);
+}
+.rhr-big {
+  text-shadow: 0 0 28px rgba(147,51,234,0.75);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SHIMMER-SKELETON (Ladezustand der Karten)
+══════════════════════════════════════════════════════════════════════ */
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+
+.card-body.card-loading::before,
+.card-body.card-loading::after {
+  content: '';
+  display: block;
+  border-radius: 10px;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.02) 0%,
+    rgba(255,255,255,0.07) 50%,
+    rgba(255,255,255,0.02) 100%
+  );
+  background-size: 600px 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.card-body.card-loading::before { height: 68px; margin-bottom: 10px; }
+.card-body.card-loading::after  { height: 100px; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   KARTEN-INNEN-TEILER
+══════════════════════════════════════════════════════════════════════ */
+.card-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 10px 0;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   WERT-STATUS-BADGES
+══════════════════════════════════════════════════════════════════════ */
+.status-badge {
+  display: inline-block;
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 10px;
+}
+.status-badge.badge-green  { background: var(--green-dim);            color: var(--green); }
+.status-badge.badge-yellow { background: var(--yellow-dim);           color: var(--yellow); }
+.status-badge.badge-red    { background: var(--red-dim);              color: var(--red); }
+.status-badge.badge-blue   { background: rgba(83,157,245,0.15);       color: var(--blue); }
+.status-badge.badge-purple { background: rgba(167,139,250,0.15);      color: var(--purple); }
+.status-badge.badge-purple-dark { background: rgba(147,51,234,0.18); color: #9333ea; }
+
 /* ── Animations ────────────────────────────────────────────────────── */
 @keyframes cardReveal {
   0%   { opacity: 0;  transform: translateY(18px) scale(0.97); }
@@ -1394,14 +1602,17 @@ body::after {
 @media (max-width: 600px) {
 
   /* Kein Hover auf Touch-Geräten */
-  .card:hover,
-  .card:hover::before {
+  .card:hover {
     transform: none;
-    background: var(--surface-0);
-    border-color: var(--border);
+    background-image:
+      linear-gradient(rgba(14,15,16,0.84), rgba(14,15,16,0.84)),
+      linear-gradient(135deg,
+        var(--card-a, rgba(30,215,96,0.22)) 0%,
+        rgba(255,255,255,0.03) 50%,
+        var(--card-b, rgba(83,157,245,0.14)) 100%);
     box-shadow: var(--shadow-sm);
-    opacity: 0;
   }
+  .card:hover::before { opacity: 0; }
 
   /* App Shell */
   .app {
