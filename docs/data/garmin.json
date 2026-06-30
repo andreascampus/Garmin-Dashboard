@@ -1,21 +1,27 @@
 {
-  "updated_at": "2026-06-29T20:16:54Z",
+  "updated_at": "2026-06-30T12:33:20Z",
   "hrv": {
     "lastNight": null,
-    "status": "LOW",
-    "weeklyAvg": 101,
+    "status": "UNBALANCED",
+    "weeklyAvg": 103,
     "balancedLow": null,
     "balancedHigh": null
   },
   "bodyBattery": {
     "current": null,
-    "charged": 63,
-    "drained": 84,
+    "charged": 87,
+    "drained": 2,
     "history": [
+      {
+        "date": "2026-06-30",
+        "charged": 87,
+        "drained": 2,
+        "endValue": null
+      },
       {
         "date": "2026-06-29",
         "charged": 63,
-        "drained": 84,
+        "drained": 87,
         "endValue": null
       },
       {
@@ -185,49 +191,85 @@
         "charged": 101,
         "drained": 72,
         "endValue": null
-      },
-      {
-        "date": "2026-05-31",
-        "charged": 0,
-        "drained": 4,
-        "endValue": null
       }
     ]
   },
-  "restingHeartRate": 41.0,
+  "restingHeartRate": 42.0,
   "sleep": {
-    "score": 92,
-    "totalSeconds": 29760,
-    "deepSeconds": 4980,
-    "lightSeconds": 16260,
-    "remSeconds": 8520,
-    "awakeSeconds": 1140
+    "score": 87,
+    "totalSeconds": 25980,
+    "deepSeconds": 5700,
+    "lightSeconds": 14760,
+    "remSeconds": 5520,
+    "awakeSeconds": 240
   },
   "stress": {
-    "avgStressLevel": 34,
-    "maxStressLevel": 93
+    "avgStressLevel": 8,
+    "maxStressLevel": 81
   },
   "vo2max": null,
   "fitnessAge": null,
-  "trainingReadiness": 81,
+  "trainingReadiness": 82,
   "stepsToday": null,
   "lastActivity": {
-    "date": "2026-06-29",
-    "name": "Krafttrai​ning",
-    "type": "strength_training",
-    "distanceMeters": 0.0,
-    "durationSeconds": 1951.551025390625,
-    "avgHr": 111.0,
-    "maxHr": 136.0,
-    "calories": 214.0
+    "date": "2026-06-30",
+    "name": "Lieboch Rennradfahren",
+    "type": "road_biking",
+    "distanceMeters": 35686.78125,
+    "durationSeconds": 5158.65185546875,
+    "avgHr": null,
+    "maxHr": null,
+    "calories": 791.0
+  },
+  "spo2": {
+    "today": 98.0,
+    "history": [
+      {
+        "date": "2026-06-30",
+        "value": 98.0
+      },
+      {
+        "date": "2026-06-29",
+        "value": 96.0
+      },
+      {
+        "date": "2026-06-28",
+        "value": 96.0
+      },
+      {
+        "date": "2026-06-27",
+        "value": 94.0
+      },
+      {
+        "date": "2026-06-26",
+        "value": 98.0
+      },
+      {
+        "date": "2026-06-25",
+        "value": 98.0
+      },
+      {
+        "date": "2026-06-24",
+        "value": 97.0
+      }
+    ]
   },
   "bodyComposition": [
+    {
+      "date": "2026-06-30",
+      "weight": 78.14,
+      "bmi": 22.1,
+      "bodyFat": 16.8,
+      "muscleMass": 34.7,
+      "boneMass": 5.54,
+      "bodyWater": 60.7
+    },
     {
       "date": "2026-06-29",
       "weight": 78.75,
       "bmi": 22.3,
       "bodyFat": 17.0,
-      "muscleMass": null,
+      "muscleMass": 34.8,
       "boneMass": 5.59,
       "bodyWater": 60.6
     },
@@ -236,7 +278,7 @@
       "weight": 78.19,
       "bmi": 22.1,
       "bodyFat": 18.1,
-      "muscleMass": null,
+      "muscleMass": 34.7,
       "boneMass": 5.43,
       "bodyWater": 59.8
     },
@@ -245,7 +287,7 @@
       "weight": 77.97,
       "bmi": 22.1,
       "bodyFat": 17.4,
-      "muscleMass": null,
+      "muscleMass": 34.6,
       "boneMass": 5.48,
       "bodyWater": 60.3
     },
@@ -254,7 +296,7 @@
       "weight": 78.86,
       "bmi": 22.3,
       "bodyFat": 17.4,
-      "muscleMass": null,
+      "muscleMass": 34.8,
       "boneMass": 5.56,
       "bodyWater": 60.3
     },
@@ -263,7 +305,7 @@
       "weight": 79.55,
       "bmi": 22.5,
       "bodyFat": 17.1,
-      "muscleMass": null,
+      "muscleMass": 35.0,
       "boneMass": 5.66,
       "bodyWater": 60.5
     },
@@ -272,7 +314,7 @@
       "weight": 78.01,
       "bmi": 22.1,
       "bodyFat": 17.3,
-      "muscleMass": null,
+      "muscleMass": 34.6,
       "boneMass": 5.49,
       "bodyWater": 60.4
     },
@@ -281,7 +323,7 @@
       "weight": 77.92,
       "bmi": 22.0,
       "bodyFat": 18.0,
-      "muscleMass": null,
+      "muscleMass": 34.6,
       "boneMass": 5.41,
       "bodyWater": 59.9
     },
@@ -290,7 +332,7 @@
       "weight": 79.01,
       "bmi": 22.4,
       "bodyFat": 17.8,
-      "muscleMass": null,
+      "muscleMass": 34.9,
       "boneMass": 5.53,
       "bodyWater": 60.0
     },
@@ -299,7 +341,7 @@
       "weight": 79.42,
       "bmi": 22.5,
       "bodyFat": 17.3,
-      "muscleMass": null,
+      "muscleMass": 35.0,
       "boneMass": 5.62,
       "bodyWater": 60.3
     },
@@ -308,7 +350,7 @@
       "weight": 78.48,
       "bmi": 22.2,
       "bodyFat": 17.5,
-      "muscleMass": null,
+      "muscleMass": 34.8,
       "boneMass": 5.51,
       "bodyWater": 60.2
     },
@@ -317,7 +359,7 @@
       "weight": 78.58,
       "bmi": 22.2,
       "bodyFat": 17.3,
-      "muscleMass": null,
+      "muscleMass": 34.8,
       "boneMass": 5.55,
       "bodyWater": 60.4
     },
@@ -326,7 +368,7 @@
       "weight": 78.44,
       "bmi": 22.2,
       "bodyFat": 18.0,
-      "muscleMass": null,
+      "muscleMass": 34.8,
       "boneMass": 5.47,
       "bodyWater": 59.9
     },
@@ -335,7 +377,7 @@
       "weight": 78.46,
       "bmi": 22.2,
       "bodyFat": 17.6,
-      "muscleMass": null,
+      "muscleMass": 34.8,
       "boneMass": 5.51,
       "bodyWater": 60.2
     },
@@ -344,7 +386,7 @@
       "weight": 78.58,
       "bmi": 22.2,
       "bodyFat": 17.7,
-      "muscleMass": null,
+      "muscleMass": 34.8,
       "boneMass": 5.5,
       "bodyWater": 60.0
     },
@@ -353,7 +395,7 @@
       "weight": 78.91,
       "bmi": 22.3,
       "bodyFat": 16.7,
-      "muscleMass": null,
+      "muscleMass": 34.9,
       "boneMass": 5.63,
       "bodyWater": 60.8
     },
@@ -362,7 +404,7 @@
       "weight": 78.71,
       "bmi": 22.3,
       "bodyFat": 17.3,
-      "muscleMass": null,
+      "muscleMass": 34.8,
       "boneMass": 5.55,
       "bodyWater": 60.3
     },
@@ -371,7 +413,7 @@
       "weight": 79.54,
       "bmi": 22.5,
       "bodyFat": 17.4,
-      "muscleMass": null,
+      "muscleMass": 35.0,
       "boneMass": 5.63,
       "bodyWater": 60.3
     },
@@ -380,7 +422,7 @@
       "weight": 78.09,
       "bmi": 22.1,
       "bodyFat": 17.7,
-      "muscleMass": null,
+      "muscleMass": 34.7,
       "boneMass": 5.46,
       "bodyWater": 60.1
     },
@@ -389,7 +431,7 @@
       "weight": 79.71,
       "bmi": 22.6,
       "bodyFat": 17.9,
-      "muscleMass": null,
+      "muscleMass": 35.1,
       "boneMass": 5.6,
       "bodyWater": 60.0
     },
@@ -398,7 +440,7 @@
       "weight": 80.11,
       "bmi": 22.7,
       "bodyFat": 18.1,
-      "muscleMass": null,
+      "muscleMass": 35.2,
       "boneMass": 5.61,
       "bodyWater": 59.8
     },
@@ -407,7 +449,7 @@
       "weight": 79.59,
       "bmi": 22.5,
       "bodyFat": 17.8,
-      "muscleMass": null,
+      "muscleMass": 35.0,
       "boneMass": 5.59,
       "bodyWater": 60.0
     },
@@ -416,7 +458,7 @@
       "weight": 80.32,
       "bmi": 22.7,
       "bodyFat": 17.9,
-      "muscleMass": null,
+      "muscleMass": 35.2,
       "boneMass": 5.66,
       "bodyWater": 60.0
     },
@@ -425,7 +467,7 @@
       "weight": 79.39,
       "bmi": 22.5,
       "bodyFat": 18.9,
-      "muscleMass": null,
+      "muscleMass": 35.0,
       "boneMass": 5.47,
       "bodyWater": 59.2
     },
@@ -434,7 +476,7 @@
       "weight": 79.38,
       "bmi": 22.5,
       "bodyFat": 18.3,
-      "muscleMass": null,
+      "muscleMass": 35.0,
       "boneMass": 5.53,
       "bodyWater": 59.7
     },
@@ -443,7 +485,7 @@
       "weight": 79.99,
       "bmi": 22.6,
       "bodyFat": 18.6,
-      "muscleMass": null,
+      "muscleMass": 35.1,
       "boneMass": 5.56,
       "bodyWater": 59.4
     },
@@ -452,7 +494,7 @@
       "weight": 79.46,
       "bmi": 22.5,
       "bodyFat": 18.1,
-      "muscleMass": null,
+      "muscleMass": 35.0,
       "boneMass": 5.55,
       "bodyWater": 59.8
     },
@@ -461,7 +503,7 @@
       "weight": 79.81,
       "bmi": 22.6,
       "bodyFat": 18.7,
-      "muscleMass": null,
+      "muscleMass": 35.1,
       "boneMass": 5.53,
       "bodyWater": 59.4
     },
@@ -470,7 +512,7 @@
       "weight": 78.65,
       "bmi": 22.3,
       "bodyFat": 18.5,
-      "muscleMass": null,
+      "muscleMass": 34.8,
       "boneMass": 5.44,
       "bodyWater": 59.5
     },
@@ -479,7 +521,7 @@
       "weight": 79.75,
       "bmi": 22.6,
       "bodyFat": 18.6,
-      "muscleMass": null,
+      "muscleMass": 35.1,
       "boneMass": 5.53,
       "bodyWater": 59.4
     },
@@ -488,7 +530,7 @@
       "weight": 79.83,
       "bmi": 22.6,
       "bodyFat": 18.3,
-      "muscleMass": null,
+      "muscleMass": 35.1,
       "boneMass": 5.57,
       "bodyWater": 59.6
     },
@@ -497,7 +539,7 @@
       "weight": 80.84,
       "bmi": 22.9,
       "bodyFat": 17.8,
-      "muscleMass": null,
+      "muscleMass": 35.3,
       "boneMass": 5.72,
       "bodyWater": 60.0
     },
@@ -506,7 +548,7 @@
       "weight": 79.55,
       "bmi": 22.5,
       "bodyFat": 18.5,
-      "muscleMass": null,
+      "muscleMass": 35.0,
       "boneMass": 5.53,
       "bodyWater": 59.5
     },
@@ -515,7 +557,7 @@
       "weight": 80.72,
       "bmi": 22.8,
       "bodyFat": 18.4,
-      "muscleMass": null,
+      "muscleMass": 35.3,
       "boneMass": 5.64,
       "bodyWater": 59.5
     },
@@ -524,7 +566,7 @@
       "weight": 80.67,
       "bmi": 22.8,
       "bodyFat": 18.4,
-      "muscleMass": null,
+      "muscleMass": 35.3,
       "boneMass": 5.64,
       "bodyWater": 59.5
     },
@@ -533,7 +575,7 @@
       "weight": 79.36,
       "bmi": 22.5,
       "bodyFat": 18.6,
-      "muscleMass": null,
+      "muscleMass": 35.0,
       "boneMass": 5.49,
       "bodyWater": 59.4
     },
@@ -542,7 +584,7 @@
       "weight": 81.88,
       "bmi": 23.2,
       "bodyFat": 18.4,
-      "muscleMass": null,
+      "muscleMass": 35.6,
       "boneMass": 5.76,
       "bodyWater": 59.6
     },
@@ -551,7 +593,7 @@
       "weight": 80.23,
       "bmi": 22.7,
       "bodyFat": 18.2,
-      "muscleMass": null,
+      "muscleMass": 35.2,
       "boneMass": 5.62,
       "bodyWater": 59.7
     },
@@ -560,7 +602,7 @@
       "weight": 80.45,
       "bmi": 22.8,
       "bodyFat": 18.3,
-      "muscleMass": null,
+      "muscleMass": 35.2,
       "boneMass": 5.63,
       "bodyWater": 59.6
     },
@@ -569,7 +611,7 @@
       "weight": 80.24,
       "bmi": 22.7,
       "bodyFat": 18.0,
-      "muscleMass": null,
+      "muscleMass": 35.2,
       "boneMass": 5.64,
       "bodyWater": 59.8
     },
@@ -578,7 +620,7 @@
       "weight": 80.96,
       "bmi": 22.9,
       "bodyFat": 18.6,
-      "muscleMass": null,
+      "muscleMass": 35.4,
       "boneMass": 5.65,
       "bodyWater": 59.5
     },
@@ -587,7 +629,7 @@
       "weight": 80.84,
       "bmi": 22.9,
       "bodyFat": 18.5,
-      "muscleMass": null,
+      "muscleMass": 35.3,
       "boneMass": 5.65,
       "bodyWater": 59.5
     },
@@ -596,7 +638,7 @@
       "weight": 80.64,
       "bmi": 22.8,
       "bodyFat": 18.8,
-      "muscleMass": null,
+      "muscleMass": 35.3,
       "boneMass": 5.6,
       "bodyWater": 59.3
     },
@@ -605,7 +647,7 @@
       "weight": 81.28,
       "bmi": 23.0,
       "bodyFat": 19.0,
-      "muscleMass": null,
+      "muscleMass": 35.4,
       "boneMass": 5.65,
       "bodyWater": 59.2
     },
@@ -614,7 +656,7 @@
       "weight": 80.61,
       "bmi": 22.8,
       "bodyFat": 19.3,
-      "muscleMass": null,
+      "muscleMass": 35.3,
       "boneMass": 5.55,
       "bodyWater": 58.9
     },
@@ -623,7 +665,7 @@
       "weight": 80.44,
       "bmi": 22.8,
       "bodyFat": 18.3,
-      "muscleMass": null,
+      "muscleMass": 35.2,
       "boneMass": 5.63,
       "bodyWater": 59.6
     },
@@ -632,7 +674,7 @@
       "weight": 79.98,
       "bmi": 22.6,
       "bodyFat": 0.0,
-      "muscleMass": null,
+      "muscleMass": 0,
       "boneMass": 0.0,
       "bodyWater": 0.0
     },
@@ -641,7 +683,7 @@
       "weight": 80.33,
       "bmi": 22.7,
       "bodyFat": 18.5,
-      "muscleMass": null,
+      "muscleMass": 35.2,
       "boneMass": 5.6,
       "bodyWater": 59.5
     },
@@ -650,7 +692,7 @@
       "weight": 80.26,
       "bmi": 22.7,
       "bodyFat": 0.0,
-      "muscleMass": null,
+      "muscleMass": 0,
       "boneMass": 0.0,
       "bodyWater": 0.0
     },
@@ -659,7 +701,7 @@
       "weight": 79.96,
       "bmi": 22.6,
       "bodyFat": 18.8,
-      "muscleMass": null,
+      "muscleMass": 35.1,
       "boneMass": 5.53,
       "bodyWater": 59.2
     },
@@ -668,7 +710,7 @@
       "weight": 80.28,
       "bmi": 22.7,
       "bodyFat": 18.2,
-      "muscleMass": null,
+      "muscleMass": 35.2,
       "boneMass": 5.62,
       "bodyWater": 59.7
     }
@@ -676,14 +718,29 @@
   "history": {
     "days": [
       {
+        "date": "2026-06-30",
+        "bbCharged": 87,
+        "bbDrained": 2,
+        "steps": null,
+        "sleepScore": 87,
+        "sleepSeconds": 25980,
+        "avgStress": 8,
+        "rhr": 42,
+        "activeCalories": 657.0,
+        "bmrCalories": 1032.0,
+        "hrv": null
+      },
+      {
         "date": "2026-06-29",
         "bbCharged": 63,
-        "bbDrained": 84,
+        "bbDrained": 87,
         "steps": null,
         "sleepScore": 92,
         "sleepSeconds": 29760,
         "avgStress": 34,
-        "rhr": 41.0,
+        "rhr": 41,
+        "activeCalories": 679.0,
+        "bmrCalories": 2254.0,
         "hrv": null
       },
       {
@@ -694,7 +751,9 @@
         "sleepScore": 74,
         "sleepSeconds": 19920,
         "avgStress": 10,
-        "rhr": 40.0,
+        "rhr": 40,
+        "activeCalories": 302.0,
+        "bmrCalories": 2247.0,
         "hrv": null
       },
       {
@@ -705,7 +764,9 @@
         "sleepScore": null,
         "sleepSeconds": null,
         "avgStress": 22,
-        "rhr": 43.0,
+        "rhr": 43,
+        "activeCalories": 59.0,
+        "bmrCalories": 2247.0,
         "hrv": null
       },
       {
@@ -716,7 +777,9 @@
         "sleepScore": 78,
         "sleepSeconds": 22680,
         "avgStress": 33,
-        "rhr": 43.0,
+        "rhr": 43,
+        "activeCalories": 169.0,
+        "bmrCalories": 2247.0,
         "hrv": null
       },
       {
@@ -727,7 +790,9 @@
         "sleepScore": 86,
         "sleepSeconds": 27300,
         "avgStress": 27,
-        "rhr": 43.0,
+        "rhr": 43,
+        "activeCalories": 453.0,
+        "bmrCalories": 2247.0,
         "hrv": null
       },
       {
@@ -738,7 +803,9 @@
         "sleepScore": 97,
         "sleepSeconds": 28200,
         "avgStress": 31,
-        "rhr": 41.0,
+        "rhr": 41,
+        "activeCalories": 600.0,
+        "bmrCalories": 2244.0,
         "hrv": null
       },
       {
@@ -749,7 +816,9 @@
         "sleepScore": 86,
         "sleepSeconds": 24540,
         "avgStress": 23,
-        "rhr": 42.0,
+        "rhr": 42,
+        "activeCalories": 391.0,
+        "bmrCalories": 2255.0,
         "hrv": null
       },
       {
@@ -760,7 +829,9 @@
         "sleepScore": 87,
         "sleepSeconds": 26149,
         "avgStress": 35,
-        "rhr": 43.0,
+        "rhr": 43,
+        "activeCalories": 237.0,
+        "bmrCalories": 2255.0,
         "hrv": null
       },
       {
@@ -771,7 +842,9 @@
         "sleepScore": 97,
         "sleepSeconds": 27300,
         "avgStress": 30,
-        "rhr": 44.0,
+        "rhr": 44,
+        "activeCalories": 263.0,
+        "bmrCalories": 2264.0,
         "hrv": null
       },
       {
@@ -782,7 +855,9 @@
         "sleepScore": 74,
         "sleepSeconds": 26040,
         "avgStress": 39,
-        "rhr": 46.0,
+        "rhr": 46,
+        "activeCalories": 1264.0,
+        "bmrCalories": 2244.0,
         "hrv": null
       },
       {
@@ -793,7 +868,9 @@
         "sleepScore": 87,
         "sleepSeconds": 27960,
         "avgStress": 33,
-        "rhr": 43.0,
+        "rhr": 43,
+        "activeCalories": 241.0,
+        "bmrCalories": 2244.0,
         "hrv": null
       },
       {
@@ -804,7 +881,9 @@
         "sleepScore": 89,
         "sleepSeconds": 28200,
         "avgStress": 34,
-        "rhr": 45.0,
+        "rhr": 45,
+        "activeCalories": 466.0,
+        "bmrCalories": 2243.0,
         "hrv": null
       },
       {
@@ -815,7 +894,9 @@
         "sleepScore": 83,
         "sleepSeconds": 25320,
         "avgStress": 33,
-        "rhr": 42.0,
+        "rhr": 42,
+        "activeCalories": 1028.0,
+        "bmrCalories": 2257.0,
         "hrv": null
       },
       {
@@ -826,7 +907,9 @@
         "sleepScore": 91,
         "sleepSeconds": 26160,
         "avgStress": 22,
-        "rhr": 41.0,
+        "rhr": 41,
+        "activeCalories": 395.0,
+        "bmrCalories": 2261.0,
         "hrv": null
       },
       {
@@ -837,7 +920,9 @@
         "sleepScore": 100,
         "sleepSeconds": 30600,
         "avgStress": 19,
-        "rhr": 44.0,
+        "rhr": 44,
+        "activeCalories": 46.0,
+        "bmrCalories": 2261.0,
         "hrv": null
       },
       {
@@ -848,7 +933,9 @@
         "sleepScore": 84,
         "sleepSeconds": 25080,
         "avgStress": 31,
-        "rhr": 42.0,
+        "rhr": 42,
+        "activeCalories": 434.0,
+        "bmrCalories": 2252.0,
         "hrv": null
       },
       {
@@ -859,7 +946,9 @@
         "sleepScore": 95,
         "sleepSeconds": 28740,
         "avgStress": 20,
-        "rhr": 41.0,
+        "rhr": 41,
+        "activeCalories": 446.0,
+        "bmrCalories": 2252.0,
         "hrv": null
       },
       {
@@ -870,7 +959,9 @@
         "sleepScore": 76,
         "sleepSeconds": 20940,
         "avgStress": 26,
-        "rhr": 41.0,
+        "rhr": 41,
+        "activeCalories": 620.0,
+        "bmrCalories": 2249.0,
         "hrv": null
       },
       {
@@ -881,7 +972,9 @@
         "sleepScore": 94,
         "sleepSeconds": 29460,
         "avgStress": 19,
-        "rhr": 40.0,
+        "rhr": 40,
+        "activeCalories": 74.0,
+        "bmrCalories": 2249.0,
         "hrv": null
       },
       {
@@ -892,7 +985,9 @@
         "sleepScore": 92,
         "sleepSeconds": 27060,
         "avgStress": 17,
-        "rhr": 40.0,
+        "rhr": 40,
+        "activeCalories": 236.0,
+        "bmrCalories": 2250.0,
         "hrv": null
       },
       {
@@ -903,7 +998,9 @@
         "sleepScore": 88,
         "sleepSeconds": 25380,
         "avgStress": 19,
-        "rhr": 41.0,
+        "rhr": 41,
+        "activeCalories": 338.0,
+        "bmrCalories": 2250.0,
         "hrv": null
       },
       {
@@ -914,7 +1011,9 @@
         "sleepScore": 86,
         "sleepSeconds": 27240,
         "avgStress": 35,
-        "rhr": 43.0,
+        "rhr": 43,
+        "activeCalories": 595.0,
+        "bmrCalories": 2250.0,
         "hrv": null
       },
       {
@@ -925,7 +1024,9 @@
         "sleepScore": 94,
         "sleepSeconds": 28140,
         "avgStress": 35,
-        "rhr": 43.0,
+        "rhr": 43,
+        "activeCalories": 1365.0,
+        "bmrCalories": 2252.0,
         "hrv": null
       },
       {
@@ -936,7 +1037,9 @@
         "sleepScore": 86,
         "sleepSeconds": 25723,
         "avgStress": 23,
-        "rhr": 42.0,
+        "rhr": 42,
+        "activeCalories": 325.0,
+        "bmrCalories": 2255.0,
         "hrv": null
       },
       {
@@ -947,7 +1050,9 @@
         "sleepScore": 90,
         "sleepSeconds": 29340,
         "avgStress": 23,
-        "rhr": 43.0,
+        "rhr": 43,
+        "activeCalories": 294.0,
+        "bmrCalories": 2253.0,
         "hrv": null
       },
       {
@@ -958,7 +1063,9 @@
         "sleepScore": null,
         "sleepSeconds": null,
         "avgStress": 42,
-        "rhr": 45.0,
+        "rhr": 45,
+        "activeCalories": 1358.0,
+        "bmrCalories": 2263.0,
         "hrv": null
       },
       {
@@ -969,7 +1076,9 @@
         "sleepScore": 88,
         "sleepSeconds": 25951,
         "avgStress": 21,
-        "rhr": 40.0,
+        "rhr": 40,
+        "activeCalories": 248.0,
+        "bmrCalories": 2263.0,
         "hrv": null
       },
       {
@@ -980,7 +1089,9 @@
         "sleepScore": 91,
         "sleepSeconds": 26280,
         "avgStress": 24,
-        "rhr": 41.0,
+        "rhr": 41,
+        "activeCalories": 633.0,
+        "bmrCalories": 2263.0,
         "hrv": null
       },
       {
@@ -991,22 +1102,23 @@
         "sleepScore": 98,
         "sleepSeconds": 28020,
         "avgStress": 21,
-        "rhr": 40.0,
-        "hrv": null
-      },
-      {
-        "date": "2026-05-31",
-        "bbCharged": 0,
-        "bbDrained": 4,
-        "steps": null,
-        "sleepScore": null,
-        "sleepSeconds": null,
-        "avgStress": 31,
-        "rhr": 41.0,
+        "rhr": 40,
+        "activeCalories": 133.0,
+        "bmrCalories": 2263.0,
         "hrv": null
       }
     ],
     "activities": [
+      {
+        "date": "2026-06-30",
+        "name": "Lieboch Rennradfahren",
+        "type": "road_biking",
+        "distanceMeters": 35686.78125,
+        "durationSeconds": 5158.65185546875,
+        "avgHr": null,
+        "maxHr": null,
+        "calories": 791.0
+      },
       {
         "date": "2026-06-29",
         "name": "Krafttrai​ning",
@@ -1296,16 +1408,6 @@
         "avgHr": null,
         "maxHr": null,
         "calories": 437.0
-      },
-      {
-        "date": "2026-05-24",
-        "name": "Lieboch Rennradfahren",
-        "type": "road_biking",
-        "distanceMeters": 61063.921875,
-        "durationSeconds": 10642.6630859375,
-        "avgHr": null,
-        "maxHr": null,
-        "calories": 1375.0
       }
     ]
   }
