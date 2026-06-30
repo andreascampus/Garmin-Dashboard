@@ -91,7 +91,15 @@ try {
   return;
 }
 
-// ── Timestamp ───────────────────────────────────────────────────────────────
+// ── Datum + Timestamp ────────────────────────────────────────────────────────
+const today = new Date();
+const dateEl = $('header-date');
+if (dateEl) {
+  dateEl.textContent = today.toLocaleDateString('de-DE', {
+    weekday: 'long', day: 'numeric', month: 'long'
+  });
+}
+
 if (data.updated_at) {
   const d = new Date(data.updated_at);
   $('updated-time').textContent = d.toLocaleString('de-DE', {
