@@ -1192,7 +1192,7 @@ body::after {
   font-variant-numeric: tabular-nums;
   letter-spacing: -2px;
   line-height: 1;
-  color: var(--red);
+  color: #9333ea;
 }
 
 .rhr-unit {
