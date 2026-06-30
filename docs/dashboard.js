@@ -114,6 +114,28 @@ function destroyChart(key) {
   if (charts[key]) { charts[key].destroy(); delete charts[key]; }
 }
 
+// ── Error-Boundary: schützt jede Karte vor Abstürzen ────────────────────────
+function safeRender(fn, cardId) {
+  try {
+    fn();
+  } catch (err) {
+    console.error(`[${cardId}] Render-Fehler:`, err);
+    const el = $(cardId + '-body') || document.querySelector(`[id="${cardId}-body"]`);
+    if (el) {
+      el.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+             flex:1;gap:8px;color:var(--text-muted);text-align:center;padding:20px">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="opacity:.4">
+            <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span style="font-size:11px;font-weight:600">Fehler beim Laden</span>
+          <span style="font-size:9px;opacity:.6">${err.message || 'Unbekannter Fehler'}</span>
+        </div>`;
+    }
+  }
+}
+
 // ── Gemeinsame Chart-Defaults ────────────────────────────────────────────────
 const CHART_DEFAULTS = {
   responsive: true,
@@ -1066,9 +1088,28 @@ document.querySelectorAll('.time-pills').forEach(pillGroup => {
   const card = pillGroup.dataset.card;
   pillGroup.querySelectorAll('.pill').forEach(btn => {
     btn.addEventListener('click', () => {
+      if (btn.classList.contains('active')) return; // Kein Re-Render wenn schon aktiv
+
       pillGroup.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      RENDERS[card]?.(btn.dataset.range);
+
+      // Fade-Out → Render → Fade-In
+      const bodyEl = document.getElementById(`${card}-body`);
+      if (bodyEl) {
+        bodyEl.classList.add('switching');
+        bodyEl.classList.remove('switching-in');
+        setTimeout(() => {
+          safeRender(() => RENDERS[card]?.(btn.dataset.range), card);
+          bodyEl.classList.remove('switching');
+          bodyEl.classList.add('switching-in');
+          // Klasse nach Animation entfernen
+          bodyEl.addEventListener('animationend', () => {
+            bodyEl.classList.remove('switching-in');
+          }, { once: true });
+        }, 150);
+      } else {
+        RENDERS[card]?.(btn.dataset.range);
+      }
     });
   });
 });
@@ -1076,13 +1117,13 @@ document.querySelectorAll('.time-pills').forEach(pillGroup => {
 // ═══════════════════════════════════════════════════════════════════════════
 //  INITIAL RENDER — alle Karten mit "today" starten
 // ═══════════════════════════════════════════════════════════════════════════
-renderRecovery('today');
-renderBattery('today');
-renderSleep('today');
-renderSteps('today');
-renderStress('today');
-renderActivity('today');
-renderFitnessAge();
-renderBodyComp('today');
+safeRender(() => renderRecovery('today'),  'recovery');
+safeRender(() => renderBattery('today'),   'battery');
+safeRender(() => renderSleep('today'),     'sleep');
+safeRender(() => renderSteps('today'),     'steps');
+safeRender(() => renderStress('today'),    'stress');
+safeRender(() => renderActivity('today'),  'activity');
+safeRender(() => renderFitnessAge(),       'fitness-age');
+safeRender(() => renderBodyComp('today'),  'bodycomp');
 
 })();

@@ -78,28 +78,43 @@ def login():
         tf = TOKEN_DIR / "garmin_tokens.json"
         tf.write_text(token_str)
         tf.chmod(0o600)
-        api = Garmin(email="", password="", prompt_mfa=get_mfa)
-        api.login(str(TOKEN_DIR))
-        log.info("✓ Login via CI-Token")
-        return api
+        try:
+            api = Garmin(email="", password="", prompt_mfa=get_mfa)
+            api.login(str(TOKEN_DIR))
+            log.info("✓ Login via CI-Token")
+            return api
+        except GarminConnectAuthenticationError as e:
+            log.error("🔴 TOKEN ABGELAUFEN: Garmin-Token ist ungültig oder abgelaufen!")
+            log.error("   → Token erneuern: python3 fetch_data.py lokal ausführen und GARMIN_TOKENS Secret aktualisieren")
+            log.error(f"   Details: {e}")
+            sys.exit(1)
 
     # Weg 2: Lokaler Token-Cache
     if (TOKEN_DIR / "garmin_tokens.json").exists():
         log.info("Lokaler Token gefunden...")
         email, pw = get_credentials()
-        api = Garmin(email=email, password=pw, prompt_mfa=get_mfa)
-        api.login(str(TOKEN_DIR))
-        log.info("✓ Login via lokalem Token")
-        return api
+        try:
+            api = Garmin(email=email, password=pw, prompt_mfa=get_mfa)
+            api.login(str(TOKEN_DIR))
+            log.info("✓ Login via lokalem Token")
+            return api
+        except GarminConnectAuthenticationError as e:
+            log.warning(f"🟡 Lokaler Token ungültig, versuche Neu-Login... ({e})")
+            (TOKEN_DIR / "garmin_tokens.json").unlink(missing_ok=True)
 
     # Weg 3: Interaktiver Login
     email, pw = get_credentials()
     log.info("Interaktiver Login (MFA-Code wird ggf. abgefragt)...")
-    api = Garmin(email=email, password=pw, prompt_mfa=get_mfa)
-    TOKEN_DIR.mkdir(mode=0o700, exist_ok=True)
-    api.login(str(TOKEN_DIR))
-    log.info(f"✓ Login — Token gespeichert: {TOKEN_DIR}/garmin_tokens.json")
-    return api
+    try:
+        api = Garmin(email=email, password=pw, prompt_mfa=get_mfa)
+        TOKEN_DIR.mkdir(mode=0o700, exist_ok=True)
+        api.login(str(TOKEN_DIR))
+        log.info(f"✓ Login — Token gespeichert: {TOKEN_DIR}/garmin_tokens.json")
+        return api
+    except GarminConnectAuthenticationError as e:
+        log.error("🔴 LOGIN FEHLGESCHLAGEN: E-Mail/Passwort falsch oder Konto gesperrt!")
+        log.error(f"   Details: {e}")
+        sys.exit(1)
 
 
 # ── Einzel-Tag Metriken ─────────────────────────────────────────────────────
